@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: Repository,
-    private val sharedPreferences: SharedPreferences
+    sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     private val _result = MutableStateFlow(String())
@@ -55,23 +55,25 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    suspend fun getCurrencyConvertedValue() {
-        repository.getConvertedCurrency(
-            Currencies.valueOf(currencies[fromCurrencyPosition]),
-            Currencies.BDT,
-            valueInString.trim().toDouble()
-        ).collect { value ->
-            when (value) {
-                is Resource.Success -> {
-                    value.data?.let {
-                        _result.update { String.format("%.2f", value.data) }
-                    }
-                }
-                else -> {
+     fun getCurrencyConvertedValue() {
+         viewModelScope.launch {
+             repository.getConvertedCurrency(
+                 Currencies.valueOf(currencies[fromCurrencyPosition]),
+                 Currencies.BDT,
+                 valueInString.trim().toDouble()
+             ).collect { value ->
+                 when (value) {
+                     is Resource.Success -> {
+                         value.data?.let {
+                             _result.update { String.format("%.2f", value.data) }
+                         }
+                     }
+                     else -> {
 
-                }
-            }
-        }
+                     }
+                 }
+             }
+         }
     }
 
 }
