@@ -2,11 +2,13 @@ package com.codesignal.paypay.currencyconverter
 
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.codesignal.paypay.currencyconverter.common.utility.Currencies
-import com.codesignal.paypay.currencyconverter.common.utility.Resource
+import com.codesignal.paypay.currencyconverter.databinding.ActivityMainBinding
 import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -16,50 +18,33 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
-    private val mainViewModel: MainViewModel by viewModels<MainViewModel>()
+    private lateinit var binding: ActivityMainBinding
+    private val viewModel: MainViewModel by viewModels()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        binding.lifecycleOwner = this
+        binding.mainViewModel = viewModel
+        val view = binding.root
+        setContentView(view)
 
-        lifecycleScope.launch {
-            val result = mainViewModel.getALatestRates()
-            result.collect(){
-                when(it){
-                    is Resource.Loading ->{
-                        Log.d("getALatestRates", "Resource.Loading")
-                    }
-                    is Resource.Error ->{
-                        Log.d("getALatestRates", "Resource.Error")
-                    }
-                    is Resource.Success ->{
-                        Log.d("getALatestRates", "Resource.Success")
-                        Log.d("getALatestRates", it.data.toString())
-                    }
-                    is Resource.Empty ->{
-                        Log.d("getALatestRates", "Resource.Empty")
-                    }
-                }
+        binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                viewModel.fromCurrencyPosition = position
             }
 
-            val convertedValue = mainViewModel.getCurrencyConvertedValue(Currencies.CNY,Currencies.BDT,1.0)
-            convertedValue.collect(){
-                when(it){
-                    is Resource.Loading ->{
-                        Log.d("getCurrency", "Resource.Loading")
-                    }
-                    is Resource.Error ->{
-                        Log.d("getCurrency", "Resource.Error")
-                    }
-                    is Resource.Success ->{
-                        Log.d("getCurrency", "Resource.Success")
-                        Log.d("getCurrency", it.data.toString())
-                    }
-                    is Resource.Empty ->{
-                        Log.d("getCurrency", "Resource.Empty")
-                    }
-                }
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                TODO("Not yet implemented")
             }
+
         }
+
     }
 }
