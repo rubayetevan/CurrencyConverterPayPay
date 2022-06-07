@@ -2,12 +2,12 @@ package com.codesignal.paypay.currencyconverter.repository.remote
 
 import com.codesignal.paypay.currencyconverter.common.api.OpenExchangeRatesApi
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
-import com.codesignal.paypay.currencyconverter.models.LatestRates
+import com.google.gson.JsonObject
 import javax.inject.Inject
 
 class RemoteDataSource @Inject constructor(private val openExchangeRatesApi: OpenExchangeRatesApi) {
 
-    suspend fun getLatestRates(): Resource<LatestRates?> {
+    suspend fun getLatestRates(): Resource<JsonObject?> {
         return try {
             val response = openExchangeRatesApi.getAllCurrencyRateBasedOnUSD()
             if (response.isSuccessful) {

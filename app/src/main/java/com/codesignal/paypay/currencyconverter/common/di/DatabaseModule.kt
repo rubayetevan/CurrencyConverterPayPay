@@ -2,16 +2,13 @@ package com.codesignal.paypay.currencyconverter.common.di
 
 import android.content.Context
 import androidx.room.Room
-import androidx.room.RoomDatabase
-import com.codesignal.paypay.currencyconverter.models.Rates
 import com.codesignal.paypay.currencyconverter.repository.local.AppDatabase
-import com.codesignal.paypay.currencyconverter.repository.local.LatestRatesDao
+import com.codesignal.paypay.currencyconverter.repository.local.CurrencyModelDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.inject.Singleton
 
@@ -32,12 +29,10 @@ object DatabaseModule {
             },
             Executors.newSingleThreadExecutor()
         ).build()
-
-
     }
 
     @Provides
-    fun provideLatestRatesDao(appDatabase: AppDatabase): LatestRatesDao {
-        return appDatabase.latestRatesDao()
+    fun provideCurrencyModelDao(appDatabase: AppDatabase): CurrencyModelDao {
+        return appDatabase.currencyModelDao()
     }
 }

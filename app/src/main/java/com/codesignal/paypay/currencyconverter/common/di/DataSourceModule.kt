@@ -1,7 +1,7 @@
 package com.codesignal.paypay.currencyconverter.common.di
 
 import com.codesignal.paypay.currencyconverter.common.api.OpenExchangeRatesApi
-import com.codesignal.paypay.currencyconverter.repository.local.LatestRatesDao
+import com.codesignal.paypay.currencyconverter.repository.local.CurrencyModelDao
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
 import com.codesignal.paypay.currencyconverter.repository.remote.RemoteDataSource
 import dagger.Module
@@ -26,8 +26,8 @@ object DataSourceModule {
     @Singleton
     @Provides
     fun provideLocalDataSource(
-        latestRatesDao: LatestRatesDao
+        currencyModelDao: CurrencyModelDao
     ): LocalDataSource {
-        return LocalDataSource(latestRatesDao)
+        return LocalDataSource(currencyModelDao)
     }
 }

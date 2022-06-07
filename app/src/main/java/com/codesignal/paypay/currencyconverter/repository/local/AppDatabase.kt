@@ -2,10 +2,10 @@ package com.codesignal.paypay.currencyconverter.repository.local
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.codesignal.paypay.currencyconverter.models.LatestRates
+import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 
 
-@Database(entities = [LatestRates::class], version = 1, exportSchema = false)
+@Database(entities = [CurrencyModel::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun latestRatesDao():LatestRatesDao
+    abstract fun currencyModelDao():CurrencyModelDao
 }

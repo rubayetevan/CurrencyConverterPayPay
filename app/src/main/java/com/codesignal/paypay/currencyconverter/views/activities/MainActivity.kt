@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if(viewModel.fromCurrencyPosition!=position){
                     viewModel.fromCurrencyPosition = position
+                    viewModel.getCurrencyConvertedValue()
                 }
             }
 
@@ -51,7 +52,13 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        val currencyAdapter = CurrencyAdapter()
         binding.currencyRV.layoutManager = LinearLayoutManager(this@MainActivity)
-        binding.currencyRV.adapter = CurrencyAdapter(viewModel.currencies,viewModel)
+        binding.currencyRV.adapter = currencyAdapter
+        lifecycleScope.launch {
+            viewModel.result.collect{
+                currencyAdapter.setData(it)
+            }
+        }
     }
 }

@@ -16,21 +16,7 @@
         android:layout_height="match_parent">
 
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
-            android:gravity="center"
-            android:text="@{mainViewModel.result}"
-            android:textSize="34sp"
-            android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
-            app:layout_constraintEnd_toEndOf="@+id/spinner"
-            app:layout_constraintStart_toStartOf="@+id/editTextNumberDecimal"
-            app:layout_constraintTop_toBottomOf="@+id/editTextNumberDecimal"
-            tools:text="1000" />
+
 
         <Spinner
             android:id="@+id/spinner"
@@ -76,17 +62,17 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
-            android:layout_width="0dp"
             android:id="@+id/currencyRV"
+            android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView" />
+            app:layout_constraintTop_toBottomOf="@+id/editTextNumberDecimal" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -6,14 +6,16 @@ import androidx.lifecycle.viewModelScope
 import com.codesignal.paypay.currencyconverter.common.utility.Currencies
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
-import com.codesignal.paypay.currencyconverter.models.CurrencyResult
+import com.codesignal.paypay.currencyconverter.models.CurrencyModel
+
 import com.codesignal.paypay.currencyconverter.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.time.Duration
+
 import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -21,8 +23,9 @@ class MainViewModel @Inject constructor(
     sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
-    private val _result = MutableStateFlow(String())
-    val result: StateFlow<String> = _result.asStateFlow()
+    private val a: List<CurrencyModel> = ArrayList()
+    private val _result = MutableStateFlow(a)
+    val result: StateFlow<List<CurrencyModel>> = _result.asStateFlow()
 
     private val _dbLoadingState = MutableStateFlow(true)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
@@ -30,10 +33,11 @@ class MainViewModel @Inject constructor(
     val currencies = Currencies.getList()
     var fromCurrencyPosition: Int = 0
 
-    var currencyValue ="10"
+    var currencyValue = "0.00"
+
     fun setCurrencyValue(s: CharSequence) {
         currencyValue = s.toString()
-        _result.update { "" }
+        getCurrencyConvertedValue()
     }
 
     init {
@@ -46,7 +50,7 @@ class MainViewModel @Inject constructor(
 
         println("Differnce $minutes")
 
-        if (minutes>=30) {
+        if (minutes >= 30) {
             viewModelScope.launch {
                 _dbLoadingState.update { true }
                 repository.getLatestRates().collect { value ->
@@ -71,29 +75,24 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun getCurrencyConvertedValue(to: String):CurrencyResult {
-        val _r = MutableStateFlow("")
-        val r: StateFlow<String> = _r.asStateFlow()
-        val currencyResult = CurrencyResult(r)
+    fun getCurrencyConvertedValue() {
         viewModelScope.launch {
-            repository.getConvertedCurrency(
-                Currencies.valueOf(currencies[fromCurrencyPosition]),
-                Currencies.valueOf(to),
-                if(currencyValue.isBlank())0.0 else currencyValue.trim().toDouble()
-            ).collect { value ->
-                when (value) {
+            val convertedCurrencies = repository.getConvertedCurrency(
+                currencies[fromCurrencyPosition],
+                currencyValue.trim().toDouble()
+            )
+            convertedCurrencies.collect { d ->
+                when (d) {
                     is Resource.Success -> {
-                        value.data?.let {
-                            _r.update { "${String.format("%.2f", value.data)} $to" }
+                        d.data?.let {
+                            _result.update { d.data }
                         }
                     }
-                    else -> {
-
-                    }
+                    else -> {}
                 }
             }
+
         }
-        return currencyResult
     }
 
 }

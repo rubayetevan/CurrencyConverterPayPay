@@ -1,26 +1,14 @@
 package com.codesignal.paypay.currencyconverter.repository.local
 
-import androidx.sqlite.db.SimpleSQLiteQuery
-import com.codesignal.paypay.currencyconverter.common.utility.Currencies
-import com.codesignal.paypay.currencyconverter.models.LatestRates
+import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import javax.inject.Inject
 
-class LocalDataSource @Inject constructor(private val latestRatesDao: LatestRatesDao) {
+class LocalDataSource @Inject constructor(private val currencyModelDao: CurrencyModelDao) {
 
-    suspend fun insertLatestRates(latestRates: LatestRates){
-        latestRatesDao.insertLatestRate(latestRates)
+    suspend fun insertAllCurrencies(currencies: List<CurrencyModel>){
+        currencyModelDao.insertAll(currencies)
     }
 
-    suspend fun getCurrencyValueBasedOnUSD(currency:Currencies):Double{
-
-        val query = SimpleSQLiteQuery(
-            "SELECT \"${currency.name}\" FROM LatestRates ORDER BY timestamp LIMIT 1"
-        )
-
-        return latestRatesDao.getCurrencyValueBasedOnUSD(query)
-
-    }
-
-
+    suspend fun getAllCurrencies():List<CurrencyModel> = currencyModelDao.getAllCurrencies()
 
 }
