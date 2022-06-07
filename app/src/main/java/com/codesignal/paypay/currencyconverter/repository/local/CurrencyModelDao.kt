@@ -13,5 +13,5 @@ interface CurrencyModelDao {
     suspend fun insertAll(currencies: List<CurrencyModel>)
 
     @Query("SELECT * FROM currencies")
-    suspend fun getAllCurrencies(): List<CurrencyModel>
+    suspend fun getAllCurrencies(): MutableList<CurrencyModel>
 }

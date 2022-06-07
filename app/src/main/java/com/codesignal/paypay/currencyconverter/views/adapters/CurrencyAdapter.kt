@@ -23,7 +23,7 @@ class CurrencyAdapter():
     }
 
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
-        holder.bind("${currencyList[position].value} ${currencyList[position].name}")
+        holder.bind("${String.format("%.2f",currencyList[position].value)} ${currencyList[position].name}")
     }
 
     override fun getItemCount(): Int = currencyList.size

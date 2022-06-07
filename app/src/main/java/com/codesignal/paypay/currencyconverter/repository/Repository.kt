@@ -24,30 +24,43 @@ class Repository @Inject constructor(
     private val sharedPreferences: SharedPreferences
 ) {
 
+    private var currencies: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
+
     suspend fun getLatestRates(): Flow<Resource<List<CurrencyModel>>> {
         return flow {
-            emit(Resource.Loading())
-            val result = withContext(externalScope.coroutineContext) {
-                remoteDataSource.getLatestRates()
-            }
-            if (result is Resource.Success) {
-                val currencies: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
-                val rates: JsonObject? = result.data?.getAsJsonObject("rates")
+            if (currencies.isEmpty()) {
+                emit(Resource.Loading())
 
-                rates?.keySet()?.forEach { key ->
-                    val value = rates.get(key).toString()
-                    println(value)
-                    currencies.add(CurrencyModel(name = key, value = value.toDouble()))
+                val result = withContext(externalScope.coroutineContext) {
+                    remoteDataSource.getLatestRates()
                 }
+
+                if (result is Resource.Success) {
+
+                    val rates: JsonObject? = result.data?.getAsJsonObject("rates")
+
+                    rates?.keySet()?.forEach { key ->
+                        val value = rates.get(key).toString()
+                        println(value)
+                        currencies.add(CurrencyModel(name = key, value = value.toDouble()))
+                    }
+
+                    val data = Collections.unmodifiableList(currencies)
+                    withContext(externalScope.coroutineContext) {
+                        localDataSource.insertAllCurrencies(currencies = data)
+                    }
+
+                    val date = Date(System.currentTimeMillis()) //or simply new Date();
+                    sharedPreferences.edit().putLong(KEY_DB_UPDATE, date.time).apply()
+
+                    emit(Resource.Success(data = data))
+
+                } else if (result is Resource.Error) {
+                    emit(Resource.Error(result.message ?: "Could not get data."))
+                }
+            } else {
                 val data = Collections.unmodifiableList(currencies)
-                withContext(externalScope.coroutineContext) {
-                    localDataSource.insertAllCurrencies(currencies = data)
-                }
-                val date = Date(System.currentTimeMillis()) //or simply new Date();
-                sharedPreferences.edit().putLong(KEY_DB_UPDATE, date.time).apply()
                 emit(Resource.Success(data = data))
-            } else if (result is Resource.Error) {
-                emit(Resource.Error(result.message ?: "Could not get data."))
             }
         }
     }
@@ -59,8 +72,12 @@ class Repository @Inject constructor(
         return flow {
             emit(Resource.Loading<List<CurrencyModel>>())
             val results: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
-            val currencies =
-                withContext(externalScope.coroutineContext) { localDataSource.getAllCurrencies() }
+
+            if (currencies.isEmpty()) {
+                currencies = withContext(externalScope.coroutineContext) {
+                    localDataSource.getAllCurrencies()
+                }
+            }
 
             val fromValue: Double? = currencies.find { it.name == from }?.value
 
@@ -70,13 +87,17 @@ class Repository @Inject constructor(
                     var fromUsd = 1.0 / fromValue
                     fromUsd *= value
                     val convertedValue = toValue * fromUsd
-                    results.add(CurrencyModel(name = currency.name,value=convertedValue))
+                    results.add(CurrencyModel(name = currency.name, value = convertedValue))
                 }
-            }?:run {
+                val data = Collections.unmodifiableList(results)
+                if(data.isEmpty()){
+                    emit(Resource.Empty())
+                }else {
+                    emit(Resource.Success(data = data))
+                }
+            } ?: run {
                 emit(Resource.Error(message = "Can't convert Value"))
             }
-            val data = Collections.unmodifiableList(currencies)
-            emit(Resource.Success(data=data))
         }
     }
 }

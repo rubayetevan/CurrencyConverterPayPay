@@ -34,7 +34,6 @@
 
         <EditText
             android:hint="@string/type_your_currency_value"
-            android:text="@string/_0_00"
             android:id="@+id/editTextNumberDecimal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

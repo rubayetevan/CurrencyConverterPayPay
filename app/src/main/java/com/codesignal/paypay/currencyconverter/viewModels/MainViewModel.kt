@@ -37,7 +37,12 @@ class MainViewModel @Inject constructor(
 
     fun setCurrencyValue(s: CharSequence) {
         currencyValue = s.toString()
-        getCurrencyConvertedValue()
+        if (currencyValue.isEmpty() || currencyValue.isBlank()) {
+            currencyValue = "0"
+        }
+        viewModelScope.launch {
+            getCurrencyConvertedValue()
+        }
     }
 
     init {
@@ -76,23 +81,32 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCurrencyConvertedValue() {
+        val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
+        else currencyValue.trim().toDouble()
         viewModelScope.launch {
-            val convertedCurrencies = repository.getConvertedCurrency(
+            val convertedValue = repository.getConvertedCurrency(
                 currencies[fromCurrencyPosition],
-                currencyValue.trim().toDouble()
+                value
             )
-            convertedCurrencies.collect { d ->
-                when (d) {
+            convertedValue.collect { resource ->
+                when (resource) {
                     is Resource.Success -> {
-                        d.data?.let {
-                            _result.update { d.data }
-                        }
+                        _result.update { resource.data!! }
                     }
-                    else -> {}
+                    is Resource.Error -> {
+
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                    else->{
+
+                    }
                 }
             }
-
         }
+
     }
+
 
 }

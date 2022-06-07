@@ -24,7 +24,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -45,15 +44,13 @@ class MainActivity : AppCompatActivity() {
                     viewModel.getCurrencyConvertedValue()
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
-
         }
 
         val currencyAdapter = CurrencyAdapter()
-        binding.currencyRV.layoutManager = LinearLayoutManager(this@MainActivity)
+        binding.currencyRV.layoutManager = GridLayoutManager(this@MainActivity,2)
         binding.currencyRV.adapter = currencyAdapter
         lifecycleScope.launch {
             viewModel.result.collect{
