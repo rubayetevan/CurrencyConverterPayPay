@@ -27,7 +27,11 @@ class MainViewModel @Inject constructor(
     val currencies = Currencies.getList()
     var fromCurrencyPosition: Int = 0
 
-    var valueInString = ""
+    var currencyValue ="0.0"
+    fun setCurrencyValue(s: CharSequence) {
+        currencyValue = s.toString()
+        _result.update { "" }
+    }
 
     init {
         val dbUpdated = sharedPreferences.getBoolean(KEY_DB_UPDATE, false)
@@ -50,30 +54,30 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
-        }else{
+        } else {
             _dbLoadingState.update { false }
         }
     }
 
-     fun getCurrencyConvertedValue() {
-         viewModelScope.launch {
-             repository.getConvertedCurrency(
-                 Currencies.valueOf(currencies[fromCurrencyPosition]),
-                 Currencies.BDT,
-                 valueInString.trim().toDouble()
-             ).collect { value ->
-                 when (value) {
-                     is Resource.Success -> {
-                         value.data?.let {
-                             _result.update { String.format("%.2f", value.data) }
-                         }
-                     }
-                     else -> {
+    fun getCurrencyConvertedValue(to: String) {
+        viewModelScope.launch {
+            repository.getConvertedCurrency(
+                Currencies.valueOf(currencies[fromCurrencyPosition]),
+                Currencies.valueOf(to),
+                if(currencyValue.isBlank())0.0 else currencyValue.trim().toDouble()
+            ).collect { value ->
+                when (value) {
+                    is Resource.Success -> {
+                        value.data?.let {
+                            _result.update { "${String.format("%.2f", value.data)} $to" }
+                        }
+                    }
+                    else -> {
 
-                     }
-                 }
-             }
-         }
+                    }
+                }
+            }
+        }
     }
 
 }

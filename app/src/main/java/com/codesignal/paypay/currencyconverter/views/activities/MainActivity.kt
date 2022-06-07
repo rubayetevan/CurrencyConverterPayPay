@@ -1,4 +1,4 @@
-package com.codesignal.paypay.currencyconverter
+package com.codesignal.paypay.currencyconverter.views.activities
 
 import android.os.Bundle
 import android.util.Log
@@ -7,9 +7,12 @@ import android.widget.AdapterView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.codesignal.paypay.currencyconverter.common.utility.Currencies
 import com.codesignal.paypay.currencyconverter.databinding.ActivityMainBinding
 import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
+import com.codesignal.paypay.currencyconverter.views.adapters.CurrencyAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -37,7 +40,11 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                viewModel.fromCurrencyPosition = position
+                if(viewModel.fromCurrencyPosition!=position){
+                    viewModel.fromCurrencyPosition = position
+                    binding.textView.text =""
+                }
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -46,5 +53,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
+        binding.currencyRV.layoutManager = GridLayoutManager(this@MainActivity,4)
+        binding.currencyRV.adapter = CurrencyAdapter(viewModel.currencies,viewModel::getCurrencyConvertedValue)
     }
 }

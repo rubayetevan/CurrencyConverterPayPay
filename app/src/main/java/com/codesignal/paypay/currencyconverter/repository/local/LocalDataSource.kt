@@ -14,7 +14,7 @@ class LocalDataSource @Inject constructor(private val latestRatesDao: LatestRate
     suspend fun getCurrencyValueBasedOnUSD(currency:Currencies):Double{
 
         val query = SimpleSQLiteQuery(
-            "SELECT ${currency.name} FROM LatestRates ORDER BY timestamp LIMIT 1"
+            "SELECT \"${currency.name}\" FROM LatestRates ORDER BY timestamp LIMIT 1"
         )
 
         return latestRatesDao.getCurrencyValueBasedOnUSD(query)
