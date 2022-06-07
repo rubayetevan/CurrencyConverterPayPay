@@ -3,6 +3,7 @@ package com.codesignal.paypay.currencyconverter.repository
 import android.content.Context
 import android.content.SharedPreferences
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
+import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE_TIME
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
@@ -51,7 +52,7 @@ class Repository @Inject constructor(
                     }
 
                     val date = Date(System.currentTimeMillis()) //or simply new Date();
-                    sharedPreferences.edit().putLong(KEY_DB_UPDATE, date.time).apply()
+                    sharedPreferences.edit().putLong(KEY_DB_UPDATE_TIME, date.time).putBoolean(KEY_DB_UPDATE,true).apply()
 
                     emit(Resource.Success(data = data))
 

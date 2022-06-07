@@ -1,8 +1,11 @@
 package com.codesignal.paypay.currencyconverter.views.activities
 
+import android.content.Context
+import android.net.*
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +23,39 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
+    private val currencyAdapter = CurrencyAdapter()
+
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        // network is available for use
+        override fun onAvailable(network: Network) {
+            super.onAvailable(network)
+            viewModel.hasInternet(true)
+        }
+
+        // Network capabilities have changed for the network
+        override fun onCapabilitiesChanged(
+            network: Network,
+            networkCapabilities: NetworkCapabilities
+        ) {
+            super.onCapabilitiesChanged(network, networkCapabilities)
+            val hasCellular =
+                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+            val hasWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
+
+            viewModel.hasInternet(hasCellular || hasWifi)
+
+
+        }
+
+        // lost network connection
+        override fun onLost(network: Network) {
+            super.onLost(network)
+            viewModel.hasInternet(false)
+            showNoInternetToast()
+
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,6 +65,32 @@ class MainActivity : AppCompatActivity() {
         val view = binding.root
         setContentView(view)
 
+        setupNetworkMonitor()
+        setupSpinner()
+        setupRV()
+    }
+
+
+    private fun setupNetworkMonitor() {
+        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
+        val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
+        viewModel.hasInternet(isConnected)
+        if (!isConnected)
+            showNoInternetToast()
+
+        val networkRequest = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .build()
+
+        val connectivityManager =
+            getSystemService(ConnectivityManager::class.java) as ConnectivityManager
+        connectivityManager.requestNetwork(networkRequest, networkCallback)
+    }
+
+    private fun setupSpinner() {
         binding.spinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(
                 parent: AdapterView<*>?,
@@ -36,23 +98,33 @@ class MainActivity : AppCompatActivity() {
                 position: Int,
                 id: Long
             ) {
-                if(viewModel.fromCurrencyPosition!=position){
+                if (viewModel.fromCurrencyPosition != position) {
                     viewModel.fromCurrencyPosition = position
                     viewModel.getCurrencyConvertedValue()
                 }
             }
+
             override fun onNothingSelected(parent: AdapterView<*>?) {
 
             }
         }
+    }
 
-        val currencyAdapter = CurrencyAdapter()
-        binding.currencyRV.layoutManager = GridLayoutManager(this@MainActivity,2)
+    private fun setupRV() {
+        binding.currencyRV.layoutManager = GridLayoutManager(this@MainActivity, 2)
         binding.currencyRV.adapter = currencyAdapter
         lifecycleScope.launch {
-            viewModel.result.collect{
+            viewModel.result.collect {
                 currencyAdapter.setData(it)
             }
         }
+    }
+
+    private fun showNoInternetToast() {
+        Toast.makeText(
+            this@MainActivity,
+            "Internet Is not Available!",
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }
