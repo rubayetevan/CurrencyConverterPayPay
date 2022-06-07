@@ -4,8 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.codesignal.paypay.currencyconverter.databinding.ListItemCurrencyBinding
+import com.codesignal.paypay.currencyconverter.models.CurrencyResult
+import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
+import kotlinx.coroutines.flow.StateFlow
 
-class CurrencyAdapter(private val currencyList: List<String>,private val getCurrencyConvertedValue: (input: String) -> Unit) :
+class CurrencyAdapter(private val currencyList: List<String>,private val viewModel: MainViewModel):
     RecyclerView.Adapter<CurrencyAdapter.CurrencyViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CurrencyViewHolder {
@@ -15,18 +18,15 @@ class CurrencyAdapter(private val currencyList: List<String>,private val getCurr
     }
 
     override fun onBindViewHolder(holder: CurrencyViewHolder, position: Int) {
-        val currency = currencyList[position]
+        val currency = viewModel.getCurrencyConvertedValue(currencyList[position])
         holder.bind(currency)
-        holder.itemView.setOnClickListener {
-            getCurrencyConvertedValue(currency)
-        }
     }
 
     override fun getItemCount(): Int = currencyList.size
 
     inner class CurrencyViewHolder(private val binding: ListItemCurrencyBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(currency: String) {
+        fun bind(currency:CurrencyResult) {
             binding.currency = currency
         }
     }

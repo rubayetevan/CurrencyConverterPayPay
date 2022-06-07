@@ -42,18 +42,16 @@ class MainActivity : AppCompatActivity() {
             ) {
                 if(viewModel.fromCurrencyPosition!=position){
                     viewModel.fromCurrencyPosition = position
-                    binding.textView.text =""
                 }
-
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
-                TODO("Not yet implemented")
+
             }
 
         }
 
-        binding.currencyRV.layoutManager = GridLayoutManager(this@MainActivity,4)
-        binding.currencyRV.adapter = CurrencyAdapter(viewModel.currencies,viewModel::getCurrencyConvertedValue)
+        binding.currencyRV.layoutManager = LinearLayoutManager(this@MainActivity)
+        binding.currencyRV.adapter = CurrencyAdapter(viewModel.currencies,viewModel)
     }
 }

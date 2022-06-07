@@ -13,6 +13,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import java.util.*
 import javax.inject.Inject
 
 class Repository @Inject constructor(
@@ -33,7 +34,9 @@ class Repository @Inject constructor(
                 if (result.data != null) {
                     withContext(externalScope.coroutineContext) {
                         localDataSource.insertLatestRates(result.data)
-                        sharedPreferences.edit().putBoolean(KEY_DB_UPDATE, true).apply()
+                        val date = Date(System.currentTimeMillis())
+                        val millis = date.time
+                        sharedPreferences.edit().putLong(KEY_DB_UPDATE, millis).apply()
                     }
                     emit(Resource.Success(data = result.data))
 
