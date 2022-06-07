@@ -10,5 +10,6 @@ class LocalDataSource @Inject constructor(private val currencyModelDao: Currency
     }
 
     suspend fun getAllCurrencies():MutableList<CurrencyModel> = currencyModelDao.getAllCurrencies()
+    suspend fun getAllCurrencyNames():List<String> = currencyModelDao.getAllCurrencyNames()
 
 }

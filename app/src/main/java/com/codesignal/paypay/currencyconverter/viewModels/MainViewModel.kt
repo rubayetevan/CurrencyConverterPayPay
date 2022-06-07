@@ -3,19 +3,15 @@ package com.codesignal.paypay.currencyconverter.viewModels
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codesignal.paypay.currencyconverter.common.utility.Currencies
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
-
 import com.codesignal.paypay.currencyconverter.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-
 import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
@@ -23,14 +19,19 @@ class MainViewModel @Inject constructor(
     sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
-    private val a: List<CurrencyModel> = ArrayList()
-    private val _result = MutableStateFlow(a)
+    private val initialResult: List<CurrencyModel> = ArrayList()
+    private val initialCurrencyNames: List<String> = ArrayList()
+
+    private val _result = MutableStateFlow(initialResult)
     val result: StateFlow<List<CurrencyModel>> = _result.asStateFlow()
+
+    private val _currencyNames = MutableStateFlow(initialCurrencyNames)
+    val currencyNames: StateFlow<List<String>> = _currencyNames.asStateFlow()
 
     private val _dbLoadingState = MutableStateFlow(true)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
 
-    val currencies = Currencies.getList()
+
     var fromCurrencyPosition: Int = 0
 
     var currencyValue = "0.00"
@@ -53,8 +54,6 @@ class MainViewModel @Inject constructor(
         val seconds = diff / 1000
         val minutes = seconds / 60
 
-        println("Differnce $minutes")
-
         if (minutes >= 30) {
             viewModelScope.launch {
                 _dbLoadingState.update { true }
@@ -62,6 +61,7 @@ class MainViewModel @Inject constructor(
                     when (value) {
                         is Resource.Success -> {
                             _dbLoadingState.update { false }
+                            getCurrencyValues()
                         }
                         is Resource.Error -> {
                             _dbLoadingState.update { false }
@@ -78,6 +78,10 @@ class MainViewModel @Inject constructor(
         } else {
             _dbLoadingState.update { false }
         }
+
+        if (!dbLoadingState.value) {
+            getCurrencyValues()
+        }
     }
 
     fun getCurrencyConvertedValue() {
@@ -85,7 +89,7 @@ class MainViewModel @Inject constructor(
         else currencyValue.trim().toDouble()
         viewModelScope.launch {
             val convertedValue = repository.getConvertedCurrency(
-                currencies[fromCurrencyPosition],
+                currencyNames.value[fromCurrencyPosition],
                 value
             )
             convertedValue.collect { resource ->
@@ -99,13 +103,33 @@ class MainViewModel @Inject constructor(
                     is Resource.Loading -> {
 
                     }
-                    else->{
+                    else -> {
 
                     }
                 }
             }
         }
+    }
 
+    private fun getCurrencyValues() {
+        viewModelScope.launch {
+            repository.getAllCurrencyNames().collect { resource ->
+                when (resource) {
+                    is Resource.Success -> {
+                        _currencyNames.update { resource.data!! }
+                    }
+                    is Resource.Error -> {
+
+                    }
+                    is Resource.Loading -> {
+
+                    }
+                    else -> {
+
+                    }
+                }
+            }
+        }
     }
 
 

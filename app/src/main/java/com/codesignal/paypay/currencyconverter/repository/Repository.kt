@@ -2,7 +2,6 @@ package com.codesignal.paypay.currencyconverter.repository
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.codesignal.paypay.currencyconverter.common.utility.Currencies
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
@@ -25,6 +24,7 @@ class Repository @Inject constructor(
 ) {
 
     private var currencies: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
+    private var currencyNames: List<String> = ArrayList<String>()
 
     suspend fun getLatestRates(): Flow<Resource<List<CurrencyModel>>> {
         return flow {
@@ -97,6 +97,26 @@ class Repository @Inject constructor(
                 }
             } ?: run {
                 emit(Resource.Error(message = "Can't convert Value"))
+            }
+        }
+    }
+
+    suspend fun getAllCurrencyNames():Flow<Resource<List<String>>>{
+        return flow {
+            emit(Resource.Loading())
+            if(currencyNames.isEmpty()) {
+                currencyNames = withContext(externalScope.coroutineContext) {
+                    localDataSource.getAllCurrencyNames()
+                }
+                if (currencyNames.isEmpty()) {
+                    emit(Resource.Empty())
+                } else if (currencyNames.isNotEmpty()) {
+                    emit(Resource.Success(data = currencyNames))
+                } else {
+                    emit(Resource.Error(message = "Can not get currency names."))
+                }
+            }else{
+                emit(Resource.Success(data = currencyNames))
             }
         }
     }

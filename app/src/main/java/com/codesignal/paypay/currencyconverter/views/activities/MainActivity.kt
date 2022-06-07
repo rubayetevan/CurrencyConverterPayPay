@@ -1,15 +1,12 @@
 package com.codesignal.paypay.currencyconverter.views.activities
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.codesignal.paypay.currencyconverter.common.utility.Currencies
 import com.codesignal.paypay.currencyconverter.databinding.ActivityMainBinding
 import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
 import com.codesignal.paypay.currencyconverter.views.adapters.CurrencyAdapter

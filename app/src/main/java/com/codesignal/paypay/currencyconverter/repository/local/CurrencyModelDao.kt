@@ -14,4 +14,7 @@ interface CurrencyModelDao {
 
     @Query("SELECT * FROM currencies")
     suspend fun getAllCurrencies(): MutableList<CurrencyModel>
+
+    @Query("SELECT name FROM currencies")
+    suspend fun getAllCurrencyNames(): List<String>
 }
