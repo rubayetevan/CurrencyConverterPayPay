@@ -1,9 +1,7 @@
 package com.codesignal.paypay.currencyconverter.repository
 
 import android.content.Context
-import android.content.SharedPreferences
-import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
-import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE_TIME
+import com.codesignal.paypay.currencyconverter.common.utility.DB_UPDATE_TH_MIN
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
@@ -21,7 +19,6 @@ class Repository @Inject constructor(
     private val localDataSource: LocalDataSource,
     private val remoteDataSource: RemoteDataSource,
     private val externalScope: CoroutineScope,
-    private val sharedPreferences: SharedPreferences
 ) {
 
     private var currencies: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
@@ -40,6 +37,10 @@ class Repository @Inject constructor(
 
                     val rates: JsonObject? = result.data?.getAsJsonObject("rates")
 
+                    rates?.keySet()?.let {
+                        currencyNames =it.toList()
+                    }
+
                     rates?.keySet()?.forEach { key ->
                         val value = rates.get(key).toString()
                         println(value)
@@ -51,8 +52,9 @@ class Repository @Inject constructor(
                         localDataSource.insertAllCurrencies(currencies = data)
                     }
 
-                    val date = Date(System.currentTimeMillis()) //or simply new Date();
-                    sharedPreferences.edit().putLong(KEY_DB_UPDATE_TIME, date.time).putBoolean(KEY_DB_UPDATE,true).apply()
+                    val date = Date(System.currentTimeMillis())
+                    localDataSource.saveDbUpdateTime(date)
+                    localDataSource.savedBInitializedState(true)
 
                     emit(Resource.Success(data = data))
 
@@ -91,9 +93,9 @@ class Repository @Inject constructor(
                     results.add(CurrencyModel(name = currency.name, value = convertedValue))
                 }
                 val data = Collections.unmodifiableList(results)
-                if(data.isEmpty()){
+                if (data.isEmpty()) {
                     emit(Resource.Empty())
-                }else {
+                } else {
                     emit(Resource.Success(data = data))
                 }
             } ?: run {
@@ -102,10 +104,10 @@ class Repository @Inject constructor(
         }
     }
 
-    suspend fun getAllCurrencyNames():Flow<Resource<List<String>>>{
+    suspend fun getAllCurrencyNames(): Flow<Resource<List<String>>> {
         return flow {
             emit(Resource.Loading())
-            if(currencyNames.isEmpty()) {
+            if (currencyNames.isEmpty()) {
                 currencyNames = withContext(externalScope.coroutineContext) {
                     localDataSource.getAllCurrencyNames()
                 }
@@ -116,9 +118,21 @@ class Repository @Inject constructor(
                 } else {
                     emit(Resource.Error(message = "Can not get currency names."))
                 }
-            }else{
+            } else {
                 emit(Resource.Success(data = currencyNames))
             }
         }
     }
+
+    fun shouldUpdateDB(): Boolean {
+        val dbUpdatedTime = localDataSource.getDbUpdateTime()
+        val currentTime = Date(System.currentTimeMillis())
+        val diff: Long = currentTime.time - dbUpdatedTime.time
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        println("shouldUpdateDB $minutes")
+        return minutes >= DB_UPDATE_TH_MIN
+    }
+
+    fun getDbInitializationState() = localDataSource.getDBInitializedState()
 }

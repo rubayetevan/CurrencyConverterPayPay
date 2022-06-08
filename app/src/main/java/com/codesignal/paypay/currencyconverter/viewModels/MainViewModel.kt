@@ -18,7 +18,6 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: Repository,
-    private val sharedPreferences: SharedPreferences
 ) : ViewModel() {
 
     private val initialResult: List<CurrencyModel> = ArrayList()
@@ -55,14 +54,7 @@ class MainViewModel @Inject constructor(
             internetState.collect {
                 println("internetState.collect $it")
                 if (it) {
-                    val dbUpdatedTime = Date(sharedPreferences.getLong(KEY_DB_UPDATE_TIME, 0))
-                    val currentTime = Date(System.currentTimeMillis())
-
-                    val diff: Long = currentTime.time - dbUpdatedTime.time
-                    val seconds = diff / 1000
-                    val minutes = seconds / 60
-
-                    if (minutes >= DB_UPDATE_TH_MIN) {
+                    if (repository.shouldUpdateDB()) {
                         _dbLoadingState.update { true }
                         repository.getLatestRates().collect { value ->
                             when (value) {
@@ -95,7 +87,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCurrencyConvertedValue() {
-        if (sharedPreferences.getBoolean(KEY_DB_UPDATE, false)) {
+        if (repository.getDbInitializationState()) {
             val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
             else currencyValue.trim().toDouble()
             viewModelScope.launch {
@@ -124,7 +116,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getCurrencyValues() {
-        if (sharedPreferences.getBoolean(KEY_DB_UPDATE, false)) {
+        if (repository.getDbInitializationState()) {
             viewModelScope.launch {
                 repository.getAllCurrencyNames().collect { resource ->
                     when (resource) {

@@ -1,5 +1,6 @@
 package com.codesignal.paypay.currencyconverter.common.di
 
+import android.content.SharedPreferences
 import com.codesignal.paypay.currencyconverter.common.api.OpenExchangeRatesApi
 import com.codesignal.paypay.currencyconverter.repository.local.CurrencyModelDao
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
@@ -26,8 +27,9 @@ object DataSourceModule {
     @Singleton
     @Provides
     fun provideLocalDataSource(
-        currencyModelDao: CurrencyModelDao
+        currencyModelDao: CurrencyModelDao,
+        sharedPreferences: SharedPreferences
     ): LocalDataSource {
-        return LocalDataSource(currencyModelDao)
+        return LocalDataSource(currencyModelDao,sharedPreferences)
     }
 }
