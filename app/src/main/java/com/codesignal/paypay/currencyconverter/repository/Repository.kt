@@ -1,6 +1,5 @@
 package com.codesignal.paypay.currencyconverter.repository
 
-import android.content.Context
 import com.codesignal.paypay.currencyconverter.common.utility.DB_UPDATE_TH_MIN
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
@@ -15,7 +14,6 @@ import java.util.*
 import javax.inject.Inject
 
 class Repository @Inject constructor(
-    private val context: Context,
     private val localDataSource: LocalDataSource,
     private val remoteDataSource: RemoteDataSource,
     private val externalScope: CoroutineScope,

@@ -1,49 +1,40 @@
 package com.codesignal.paypay.currencyconverter.viewModels
 
-import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.codesignal.paypay.currencyconverter.common.utility.DB_UPDATE_TH_MIN
-import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
-import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE_TIME
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
+import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.Repository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: Repository,
+    private val validators: Validators,
 ) : ViewModel() {
 
-    private val initialResult: List<CurrencyModel> = ArrayList()
-    private val initialCurrencyNames: List<String> = ArrayList()
-
-    private val _result = MutableStateFlow(initialResult)
+    private val _result = MutableStateFlow(emptyList<CurrencyModel>())
     val result: StateFlow<List<CurrencyModel>> = _result.asStateFlow()
 
-    private val _currencyNames = MutableStateFlow(initialCurrencyNames)
+    private val _currencyNames = MutableStateFlow(emptyList<String>())
     val currencyNames: StateFlow<List<String>> = _currencyNames.asStateFlow()
 
     private val _dbLoadingState = MutableStateFlow(true)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
 
-    private val _internetState = MutableStateFlow(true)
-    private val internetState: StateFlow<Boolean> = _internetState.asStateFlow()
-
+    private val _internetState = MutableSharedFlow<Boolean>(replay = 0)
+    val internetState: SharedFlow<Boolean> = _internetState.asSharedFlow()
 
     var fromCurrencyPosition: Int = 0
     var currencyValue = "0.00"
 
     fun setCurrencyValue(s: CharSequence) {
-        currencyValue = s.toString()
-        if (currencyValue.isEmpty() || currencyValue.isBlank()) {
-            currencyValue = "0"
-        }
+        val value = s.toString()
+        currencyValue = if(validators.validateDecimalInput(value)) value else "0.00"
         viewModelScope.launch {
             getCurrencyConvertedValue()
         }
@@ -139,7 +130,9 @@ class MainViewModel @Inject constructor(
     }
 
     fun hasInternet(b: Boolean) {
-        _internetState.update { b }
+        viewModelScope.launch {
+            _internetState.emit(b)
+        }
     }
 
 
