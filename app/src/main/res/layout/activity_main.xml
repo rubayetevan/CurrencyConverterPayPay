@@ -16,35 +16,43 @@
         android:layout_height="match_parent">
 
         <Spinner
+
             android:id="@+id/spinner"
             android:layout_width="120dp"
             android:layout_height="42dp"
-            android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
             android:entries="@{mainViewModel.currencyNames}"
             android:textSize="24sp"
             android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="@+id/editTextNumberDecimal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/editTextNumberDecimal"
             app:layout_constraintTop_toTopOf="@+id/editTextNumberDecimal" />
 
-        <EditText
-            android:hint="@string/type_your_currency_value"
+        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/editTextNumberDecimal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="0dp"
+            android:layout_height="64dp"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:afterTextChanged="@{(edtitable)->mainViewModel.setCurrencyValue(edtitable)}"
-            android:autofillHints="Currency Value"
-            android:ems="10"
-            android:inputType="numberDecimal"
-            android:maxLength="16"
-            android:textSize="24sp"
+            android:layout_marginEnd="16dp"
             android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
+            app:layout_constraintEnd_toStartOf="@+id/spinner"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:hint="@string/currency">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:afterTextChanged="@{(edtitable)->mainViewModel.setCurrencyValue(edtitable)}"
+                android:autofillHints="Currency Value"
+                android:ems="10"
+                android:inputType="numberDecimal"
+                android:maxLength="16"
+                android:textSize="18sp"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <ProgressBar
             android:visibility="@{mainViewModel.dbLoadingState ? View.VISIBLE : View.GONE}"

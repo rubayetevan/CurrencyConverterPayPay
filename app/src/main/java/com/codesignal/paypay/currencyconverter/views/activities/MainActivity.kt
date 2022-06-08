@@ -1,10 +1,12 @@
 package com.codesignal.paypay.currencyconverter.views.activities
 
 import android.content.Context
+import android.graphics.Color
 import android.net.*
 import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -102,6 +104,15 @@ class MainActivity : AppCompatActivity() {
                     viewModel.fromCurrencyPosition = position
                     viewModel.getCurrencyConvertedValue()
                 }
+
+                try {val a :TextView = parent?.getChildAt(0) as TextView
+                    a.textSize = 18f
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
+
+
+
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
