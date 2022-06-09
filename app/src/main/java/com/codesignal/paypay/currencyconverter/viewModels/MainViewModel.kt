@@ -81,24 +81,26 @@ class MainViewModel @Inject constructor(
         if (repository.getDbInitializationState()) {
             val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
             else currencyValue.trim().toDouble()
-            viewModelScope.launch {
-                val convertedValue = repository.getConvertedCurrency(
-                    currencyNames.value[fromCurrencyPosition],
-                    value
-                )
-                convertedValue.collect { resource ->
-                    when (resource) {
-                        is Resource.Success -> {
-                            _result.update { resource.data!! }
-                        }
-                        is Resource.Error -> {
+            if(currencyNames.value.isNotEmpty()) {
+                viewModelScope.launch {
+                    val convertedValue = repository.getConvertedCurrency(
+                        currencyNames.value[fromCurrencyPosition],
+                        value
+                    )
+                    convertedValue.collect { resource ->
+                        when (resource) {
+                            is Resource.Success -> {
+                                _result.update { resource.data!! }
+                            }
+                            is Resource.Error -> {
 
-                        }
-                        is Resource.Loading -> {
+                            }
+                            is Resource.Loading -> {
 
-                        }
-                        else -> {
+                            }
+                            else -> {
 
+                            }
                         }
                     }
                 }
