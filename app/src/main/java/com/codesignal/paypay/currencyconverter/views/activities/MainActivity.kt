@@ -1,7 +1,6 @@
 package com.codesignal.paypay.currencyconverter.views.activities
 
 import android.content.Context
-import android.graphics.Color
 import android.net.*
 import android.os.Bundle
 import android.view.View

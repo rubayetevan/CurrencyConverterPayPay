@@ -2,6 +2,7 @@ package com.codesignal.paypay.currencyconverter.common.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.codesignal.paypay.currencyconverter.common.utility.SHARED_PREF_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,6 +17,6 @@ object SharedPrefModule {
     @Singleton
     @Provides
     fun provideSharedPreference(@ApplicationContext context: Context): SharedPreferences {
-        return context.getSharedPreferences("paypay", Context.MODE_PRIVATE)
+        return context.getSharedPreferences(SHARED_PREF_NAME, Context.MODE_PRIVATE)
     }
 }

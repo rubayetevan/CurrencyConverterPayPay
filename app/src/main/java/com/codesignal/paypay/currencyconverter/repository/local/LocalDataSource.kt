@@ -1,7 +1,6 @@
 package com.codesignal.paypay.currencyconverter.repository.local
 
 import android.content.SharedPreferences
-import android.media.UnsupportedSchemeException
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE_TIME
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
@@ -52,7 +51,7 @@ class LocalDataSource @Inject constructor(
     }
 
     fun getDBInitializedState():Boolean{
-        return sharedPreferences.getBoolean(KEY_DB_UPDATE,false);
+        return sharedPreferences.getBoolean(KEY_DB_UPDATE,false)
     }
 
     fun savedBInitializedState(value: Boolean){

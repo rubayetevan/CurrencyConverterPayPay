@@ -2,6 +2,8 @@ package com.codesignal.paypay.currencyconverter.common.di
 
 import android.content.Context
 import androidx.room.Room
+import com.codesignal.paypay.currencyconverter.BuildConfig
+import com.codesignal.paypay.currencyconverter.common.utility.DB_NAME
 import com.codesignal.paypay.currencyconverter.repository.local.AppDatabase
 import com.codesignal.paypay.currencyconverter.repository.local.CurrencyModelDao
 import dagger.Module
@@ -22,10 +24,12 @@ object DatabaseModule {
         return Room.databaseBuilder(
             appContext,
             AppDatabase::class.java,
-            "paypay"
+            DB_NAME
         ).setQueryCallback(
             { sqlQuery, bindArgs ->
-                println("SQL Query: $sqlQuery SQL Args: $bindArgs")
+                if (BuildConfig.DEBUG) {
+                    println("SQL Query: $sqlQuery SQL Args: $bindArgs")
+                }
             },
             Executors.newSingleThreadExecutor()
         ).build()

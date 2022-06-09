@@ -41,7 +41,6 @@ class Repository @Inject constructor(
 
                     rates?.keySet()?.forEach { key ->
                         val value = rates.get(key).toString()
-                        println(value)
                         currencies.add(CurrencyModel(name = key, value = value.toDouble()))
                     }
 
@@ -128,7 +127,6 @@ class Repository @Inject constructor(
         val diff: Long = currentTime.time - dbUpdatedTime.time
         val seconds = diff / 1000
         val minutes = seconds / 60
-        println("shouldUpdateDB $minutes")
         return minutes >= DB_UPDATE_TH_MIN
     }
 

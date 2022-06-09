@@ -23,7 +23,7 @@ class MainViewModel @Inject constructor(
     private val _currencyNames = MutableStateFlow(emptyList<String>())
     val currencyNames: StateFlow<List<String>> = _currencyNames.asStateFlow()
 
-    private val _dbLoadingState = MutableStateFlow(true)
+    private val _dbLoadingState = MutableStateFlow(false)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
 
     private val _internetState = MutableSharedFlow<Boolean>(replay = 0)
@@ -43,7 +43,6 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             internetState.collect {
-                println("internetState.collect $it")
                 if (it) {
                     if (repository.shouldUpdateDB()) {
                         _dbLoadingState.update { true }
