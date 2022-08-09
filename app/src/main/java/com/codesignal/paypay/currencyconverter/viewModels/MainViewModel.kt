@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
-import com.codesignal.paypay.currencyconverter.repository.Repository
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyConvertUseCase
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
+import com.codesignal.paypay.currencyconverter.useCases.DBinitialUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,8 +15,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: Repository,
     private val validators: Validators,
+    private val currencyConvertUseCase: CurrencyConvertUseCase,
+    private val currencyNameUseCase: CurrencyNameUseCase,
+    private val dBinitialUseCase: DBinitialUseCase,
 ) : ViewModel() {
 
     private val _result = MutableStateFlow(emptyList<CurrencyModel>())
@@ -34,7 +38,7 @@ class MainViewModel @Inject constructor(
 
     fun setCurrencyValue(s: CharSequence) {
         val value = s.toString()
-        currencyValue = if(validators.validateDecimalInput(value)) value else "0.00"
+        currencyValue = if (validators.validateDecimalInput(value)) value else "0.00"
         viewModelScope.launch {
             getCurrencyConvertedValue()
         }
@@ -44,9 +48,9 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             internetState.collect {
                 if (it) {
-                    if (repository.shouldUpdateDB()) {
+                    if (dBinitialUseCase.shouldUpdateDB()) {
                         _dbLoadingState.update { true }
-                        repository.getLatestRates().collect { value ->
+                        currencyConvertUseCase.getLatestRates().collect { value ->
                             when (value) {
                                 is Resource.Success -> {
                                     _dbLoadingState.update { false }
@@ -77,19 +81,19 @@ class MainViewModel @Inject constructor(
     }
 
     fun getCurrencyConvertedValue() {
-        if (repository.getDbInitializationState()) {
-            val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
-            else currencyValue.trim().toDouble()
-            if(currencyNames.value.isNotEmpty()) {
+        if (dBinitialUseCase.getDbInitializationState()) {
+            if (currencyNames.value.isNotEmpty()) {
                 viewModelScope.launch {
-                    val convertedValue = repository.getConvertedCurrency(
+                    val convertedValue = currencyConvertUseCase.getConvertedCurrency(
                         currencyNames.value[fromCurrencyPosition],
-                        value
+                        currencyValue
                     )
                     convertedValue.collect { resource ->
                         when (resource) {
                             is Resource.Success -> {
-                                _result.update { resource.data!! }
+                                resource.data?.let { curList ->
+                                    _result.update { curList }
+                                }
                             }
                             is Resource.Error -> {
 
@@ -108,9 +112,9 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getCurrencyValues() {
-        if (repository.getDbInitializationState()) {
+        if (dBinitialUseCase.getDbInitializationState()) {
             viewModelScope.launch {
-                repository.getAllCurrencyNames().collect { resource ->
+                currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
                             _currencyNames.update { resource.data!! }
