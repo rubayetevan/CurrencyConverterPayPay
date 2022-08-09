@@ -4,6 +4,8 @@ import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.repository.Repository
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
 import com.codesignal.paypay.currencyconverter.repository.remote.RemoteDataSource
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyConvertUseCase
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -16,17 +18,18 @@ import kotlinx.coroutines.CoroutineScope
 object ViewModelModule {
 
     @Provides
-    fun provideRepository(
-        externalScope: CoroutineScope,
-        localDataSource: LocalDataSource,
-        remoteDataSource: RemoteDataSource,
-    ): Repository {
-        return Repository(localDataSource,remoteDataSource,externalScope)
+    fun provideValidator():Validators{
+        return Validators()
     }
 
     @Provides
-    fun provideValidator():Validators{
-        return Validators()
+    fun provideCurrencyConvertUseCase(repository: Repository):CurrencyConvertUseCase{
+        return CurrencyConvertUseCase(repository)
+    }
+
+    @Provides
+    fun provideCurrencyNameUseCase(repository: Repository):CurrencyNameUseCase{
+        return CurrencyNameUseCase(repository)
     }
 
 }

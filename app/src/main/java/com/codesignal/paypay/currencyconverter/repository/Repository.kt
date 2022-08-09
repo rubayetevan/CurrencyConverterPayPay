@@ -65,41 +65,7 @@ class Repository @Inject constructor(
         }
     }
 
-    suspend fun getConvertedCurrency(
-        from: String,
-        value: Double
-    ): Flow<Resource<List<CurrencyModel>>> {
-        return flow {
-            emit(Resource.Loading<List<CurrencyModel>>())
-            val results: MutableList<CurrencyModel> = ArrayList<CurrencyModel>()
 
-            if (currencies.isEmpty()) {
-                currencies = withContext(externalScope.coroutineContext) {
-                    localDataSource.getAllCurrencies()
-                }
-            }
-
-            val fromValue: Double? = currencies.find { it.name == from }?.value
-
-            fromValue?.let {
-                currencies.forEach { currency ->
-                    val toValue: Double = currency.value
-                    var fromUsd = 1.0 / fromValue
-                    fromUsd *= value
-                    val convertedValue = toValue * fromUsd
-                    results.add(CurrencyModel(name = currency.name, value = convertedValue))
-                }
-                val data = Collections.unmodifiableList(results)
-                if (data.isEmpty()) {
-                    emit(Resource.Empty())
-                } else {
-                    emit(Resource.Success(data = data))
-                }
-            } ?: run {
-                emit(Resource.Error(message = "Can't convert Value"))
-            }
-        }
-    }
 
     suspend fun getAllCurrencyNames(): Flow<Resource<List<String>>> {
         return flow {
@@ -121,14 +87,8 @@ class Repository @Inject constructor(
         }
     }
 
-    fun shouldUpdateDB(): Boolean {
-        val dbUpdatedTime = localDataSource.getDbUpdateTime()
-        val currentTime = Date(System.currentTimeMillis())
-        val diff: Long = currentTime.time - dbUpdatedTime.time
-        val seconds = diff / 1000
-        val minutes = seconds / 60
-        return minutes >= DB_UPDATE_TH_MIN
-    }
+
+    fun getDbUpdateTime() = localDataSource.getDbUpdateTime()
 
     fun getDbInitializationState() = localDataSource.getDBInitializedState()
 }
