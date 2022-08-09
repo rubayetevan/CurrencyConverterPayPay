@@ -16,7 +16,6 @@ class LocalDataSource @Inject constructor(
         currencyModelDao.insertAll(currencies)
     }
 
-    suspend fun getAllCurrencies(): MutableList<CurrencyModel> = currencyModelDao.getAllCurrencies()
     suspend fun getAllCurrencyNames(): List<String> = currencyModelDao.getAllCurrencyNames()
 
     fun getDbUpdateTime(): Date {
