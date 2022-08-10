@@ -31,10 +31,19 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Run Tests
-        run: ./gradlew test
+      - name: Run Unit Tests
+        run: ./gradlew test --stacktrace
 
-      - name: Generate Release APK
-        run: ./gradlew assembleRelease
+      - name: Run Instrumentation Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          target: default
+          arch: x86
+          profile: Nexus 6
+          script: ./gradlew connectedCheck --stacktrace
+
+      - name: Generate Debug APK
+        run: ./gradlew assembleDebug
 
 
