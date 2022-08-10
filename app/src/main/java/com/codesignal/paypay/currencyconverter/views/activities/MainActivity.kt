@@ -15,7 +15,6 @@ import com.codesignal.paypay.currencyconverter.databinding.ActivityMainBinding
 import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
 import com.codesignal.paypay.currencyconverter.views.adapters.CurrencyAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 

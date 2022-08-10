@@ -1,6 +1,5 @@
 package com.codesignal.paypay.currencyconverter.repository
 
-import com.codesignal.paypay.currencyconverter.common.utility.DB_UPDATE_TH_MIN
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource

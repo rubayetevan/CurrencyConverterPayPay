@@ -9,18 +9,25 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "unitTest" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "master", "unitTest" ]
 
 permissions:
   contents: read
   
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-${{ hashFiles('**/*.gradle*') }}-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('**/buildSrc/**/*.kt') }}
 
       - name: Setup JDK
         uses: actions/setup-java@v3
@@ -31,10 +38,16 @@ jobs:
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
 
-      - name: Run Tests
-        run: ./gradlew test
+      - name: Run Unit Tests
+        run: ./gradlew test --stacktrace
 
-      - name: Generate Release APK
-        run: ./gradlew assembleRelease
+      - name: Run Instrumentation Tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 29
+          script: ./gradlew connectedCheck --stacktrace
+
+      - name: Generate Debug APK
+        run: ./gradlew assembleDebug
 
 
