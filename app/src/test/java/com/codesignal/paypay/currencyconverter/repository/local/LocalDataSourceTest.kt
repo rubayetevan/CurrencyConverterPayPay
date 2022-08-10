@@ -4,8 +4,7 @@ import android.content.SharedPreferences
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE
 import com.codesignal.paypay.currencyconverter.common.utility.KEY_DB_UPDATE_TIME
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert.*
-
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
@@ -40,7 +39,7 @@ class LocalDataSourceTest {
 
     @Test
     fun getDBInitializedStateNegativeTest(){
-        val expected = true
+        val expected = false
         Mockito.`when`(sharedPreferences.getBoolean(KEY_DB_UPDATE,false)).thenReturn(expected)
         val actual = localDataSource.getDBInitializedState()
         assertEquals(expected,actual)
