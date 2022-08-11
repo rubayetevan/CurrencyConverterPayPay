@@ -12,26 +12,5 @@ import org.mockito.Mockito.mock
 
 class CurrencyConvertUseCaseTest {
 
-    private val currencyModelDao : CurrencyModelDao = mock(CurrencyModelDao::class.java)
-    private val sharedPreferences : SharedPreferences = mock(SharedPreferences::class.java)
-    private lateinit var localDataSource: LocalDataSource
 
-    @Before
-    fun setup(){
-        localDataSource = LocalDataSource(currencyModelDao,sharedPreferences)
-    }
-
-    @Test
-    fun getConvertedCurrency() {
-        runBlocking {
-            val currencies = listOf("BDT", "USD", "AUD")
-            Mockito.`when`(currencyModelDao. getAllCurrencyNames()).thenReturn(currencies)
-            val result = localDataSource.getAllCurrencyNames()
-            assertEquals(currencies,result)
-        }
-    }
-
-    @Test
-    fun getLatestRates() {
-    }
 }
