@@ -38,6 +38,8 @@ class CurrencyNameUseCaseTest {
             assertTrue(first is Resource.Loading)
             val second = currencyNameUseCase.getAllCurrencyNames().drop(1).first()
             assertTrue(second is Resource.Success)
+            assertFalse(second.data.isNullOrEmpty())
+            assertEquals(expected,second.data)
         }
     }
 
