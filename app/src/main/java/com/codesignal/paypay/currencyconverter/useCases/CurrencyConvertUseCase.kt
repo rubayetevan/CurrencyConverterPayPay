@@ -25,7 +25,7 @@ class CurrencyConvertUseCase @Inject constructor(private val repository: Reposit
             val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
             else currencyValue.trim().toDouble()
 
-            repository.getLatestRates().collect { it ->
+            getLatestRates().collect { it ->
                 when(it){
                     is Resource.Success<List<CurrencyModel>> ->{
                         val currencies = it.data

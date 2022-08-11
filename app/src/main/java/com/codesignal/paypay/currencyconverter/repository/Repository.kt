@@ -44,15 +44,18 @@ class Repository @Inject constructor(
                     }
 
                     val data = Collections.unmodifiableList(currencies)
-                    withContext(externalScope.coroutineContext) {
-                        localDataSource.insertAllCurrencies(currencies = data)
+
+                    if(data.isEmpty()){
+                        emit(Resource.Empty())
+                    }else {
+                        withContext(externalScope.coroutineContext) {
+                            localDataSource.insertAllCurrencies(currencies = data)
+                        }
+                        val date = Date(System.currentTimeMillis())
+                        localDataSource.saveDbUpdateTime(date)
+                        localDataSource.savedBInitializedState(true)
+                        emit(Resource.Success(data = data))
                     }
-
-                    val date = Date(System.currentTimeMillis())
-                    localDataSource.saveDbUpdateTime(date)
-                    localDataSource.savedBInitializedState(true)
-
-                    emit(Resource.Success(data = data))
 
                 } else if (result is Resource.Error) {
                     emit(Resource.Error(result.message ?: "Could not get data."))
@@ -63,8 +66,6 @@ class Repository @Inject constructor(
             }
         }
     }
-
-
 
     suspend fun getAllCurrencyNames(): Flow<Resource<List<String>>> {
         return flow {
@@ -85,7 +86,6 @@ class Repository @Inject constructor(
             }
         }
     }
-
 
     fun getDbUpdateTime() = localDataSource.getDbUpdateTime()
 

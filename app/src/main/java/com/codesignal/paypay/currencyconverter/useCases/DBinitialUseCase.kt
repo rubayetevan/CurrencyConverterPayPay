@@ -8,7 +8,7 @@ import javax.inject.Inject
 class DBinitialUseCase @Inject constructor(private val repository: Repository) {
 
     fun shouldUpdateDB(): Boolean {
-        val dbUpdatedTime = repository.getDbUpdateTime()
+        val dbUpdatedTime = getDbUpdateTime()
         val currentTime = Date(System.currentTimeMillis())
         val diff: Long = currentTime.time - dbUpdatedTime.time
         val seconds = diff / 1000
