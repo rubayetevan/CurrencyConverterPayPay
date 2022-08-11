@@ -101,7 +101,7 @@ class MainViewModel @Inject constructor(
                             is Resource.Loading -> {
 
                             }
-                            else -> {
+                            is Resource.Empty -> {
 
                             }
                         }
@@ -117,7 +117,9 @@ class MainViewModel @Inject constructor(
                 currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
-                            _currencyNames.update { resource.data!! }
+                            resource.data?.let {cur->
+                                _currencyNames.update { cur }
+                            }
                         }
                         is Resource.Error -> {
 
@@ -125,7 +127,7 @@ class MainViewModel @Inject constructor(
                         is Resource.Loading -> {
 
                         }
-                        else -> {
+                        is Resource.Empty -> {
 
                         }
                     }
