@@ -13,45 +13,45 @@ import java.util.*
 class LocalDataSourceTest {
 
     private lateinit var localDataSource: LocalDataSource
-    private val currencyModelDao : CurrencyModelDao = Mockito.mock(CurrencyModelDao::class.java)
-    private val sharedPreferences : SharedPreferences = Mockito.mock(SharedPreferences::class.java)
+    private val currencyModelDao: CurrencyModelDao = Mockito.mock(CurrencyModelDao::class.java)
+    private val sharedPreferences: SharedPreferences = Mockito.mock(SharedPreferences::class.java)
 
     @Before
     fun setUp() {
-        localDataSource = LocalDataSource(currencyModelDao,sharedPreferences)
+        localDataSource = LocalDataSource(currencyModelDao, sharedPreferences)
     }
 
     @Test
-    fun getDbUpdateTimeTest(){
+    fun getDbUpdateTimeTest() {
         val expected = Date(System.currentTimeMillis())
         Mockito.`when`(sharedPreferences.getLong(KEY_DB_UPDATE_TIME, 0)).thenReturn(expected.time)
         val actual = localDataSource.getDbUpdateTime()
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun getDBInitializedStatePositiveTest(){
+    fun getDBInitializedStatePositiveTest() {
         val expected = true
-        Mockito.`when`(sharedPreferences.getBoolean(KEY_DB_UPDATE,false)).thenReturn(expected)
+        Mockito.`when`(sharedPreferences.getBoolean(KEY_DB_UPDATE, false)).thenReturn(expected)
         val actual = localDataSource.getDBInitializedState()
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
-    fun getDBInitializedStateNegativeTest(){
+    fun getDBInitializedStateNegativeTest() {
         val expected = false
-        Mockito.`when`(sharedPreferences.getBoolean(KEY_DB_UPDATE,false)).thenReturn(expected)
+        Mockito.`when`(sharedPreferences.getBoolean(KEY_DB_UPDATE, false)).thenReturn(expected)
         val actual = localDataSource.getDBInitializedState()
-        assertEquals(expected,actual)
+        assertEquals(expected, actual)
     }
 
     @Test
     fun getAllCurrencyNamesTest() {
         runBlocking {
             val expected = listOf("BDT", "USD", "AUD")
-            Mockito.`when`(currencyModelDao. getAllCurrencyNames()).thenReturn(expected)
+            Mockito.`when`(currencyModelDao.getAllCurrencyNames()).thenReturn(expected)
             val actual = localDataSource.getAllCurrencyNames()
-            assertEquals(expected,actual)
+            assertEquals(expected, actual)
         }
     }
 

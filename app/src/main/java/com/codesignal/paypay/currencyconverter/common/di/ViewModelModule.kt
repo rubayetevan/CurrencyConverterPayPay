@@ -2,8 +2,8 @@ package com.codesignal.paypay.currencyconverter.common.di
 
 import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.repository.Repository
-import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,17 +15,17 @@ import dagger.hilt.android.components.ViewModelComponent
 object ViewModelModule {
 
     @Provides
-    fun provideValidator():Validators{
+    fun provideValidator(): Validators {
         return Validators()
     }
 
     @Provides
-    fun provideCurrencyRateUseCase(repository: Repository):CurrencyRateUseCase{
+    fun provideCurrencyRateUseCase(repository: Repository): CurrencyRateUseCase {
         return CurrencyRateUseCase(repository)
     }
 
     @Provides
-    fun provideCurrencyNameUseCase(repository: Repository):CurrencyNameUseCase{
+    fun provideCurrencyNameUseCase(repository: Repository): CurrencyNameUseCase {
         return CurrencyNameUseCase(repository)
     }
 

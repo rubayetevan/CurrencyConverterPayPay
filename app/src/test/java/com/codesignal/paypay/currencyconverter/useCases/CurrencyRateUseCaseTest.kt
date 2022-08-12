@@ -3,13 +3,11 @@ package com.codesignal.paypay.currencyconverter.useCases
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.Repository
-import com.google.gson.JsonParser
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
-
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -17,7 +15,7 @@ import org.mockito.kotlin.stub
 
 class CurrencyRateUseCaseTest {
 
-    private val repository:Repository = mock()
+    private val repository: Repository = mock()
     private lateinit var currencyRateUseCase: CurrencyRateUseCase
 
     @Before
@@ -27,17 +25,17 @@ class CurrencyRateUseCaseTest {
 
     @Test
     fun getLatestRatesSuccessTest() {
-        val bdt =CurrencyModel(
+        val bdt = CurrencyModel(
             name = "BDT",
             value = 95.019544
         )
 
-        val usd =CurrencyModel(
+        val usd = CurrencyModel(
             name = "USD",
             value = 1.0
         )
 
-        val expected = listOf<CurrencyModel>(bdt,usd)
+        val expected = listOf<CurrencyModel>(bdt, usd)
 
         repository.stub {
             onBlocking { getLatestRates() }.thenReturn(flow {
@@ -52,8 +50,8 @@ class CurrencyRateUseCaseTest {
             val secondItem = repository.getLatestRates().drop(1).first()
             assertTrue(secondItem is Resource.Success)
             assertFalse(secondItem.data.isNullOrEmpty())
-            assertTrue( secondItem.data is List<CurrencyModel>)
-            assertTrue( 2 == secondItem.data?.size)
+            assertTrue(secondItem.data is List<CurrencyModel>)
+            assertTrue(2 == secondItem.data?.size)
         }
     }
 
@@ -91,28 +89,28 @@ class CurrencyRateUseCaseTest {
             val secondItem = repository.getLatestRates().drop(1).first()
             assertTrue(secondItem is Resource.Error)
             assertTrue(secondItem.data.isNullOrEmpty())
-            assertEquals(msg,secondItem.message)
+            assertEquals(msg, secondItem.message)
         }
     }
 
     @Test
-    fun getConvertedCurrencyRatesSuccessTest(){
-        val bdt =CurrencyModel(
+    fun getConvertedCurrencyRatesSuccessTest() {
+        val bdt = CurrencyModel(
             name = "BDT",
             value = 95.019544
         )
 
-        val usd =CurrencyModel(
+        val usd = CurrencyModel(
             name = "USD",
             value = 1.0
         )
 
-        val aed =CurrencyModel(
+        val aed = CurrencyModel(
             name = "AED",
             value = 3.673
         )
 
-        val currencyList = listOf<CurrencyModel>(bdt,usd,aed)
+        val currencyList = listOf<CurrencyModel>(bdt, usd, aed)
 
         repository.stub {
             onBlocking { getLatestRates() }.thenReturn(flow {
@@ -122,38 +120,38 @@ class CurrencyRateUseCaseTest {
         }
 
         runBlocking {
-            val firstItem = currencyRateUseCase.getConvertedCurrencyRates(aed.name,"1").first()
+            val firstItem = currencyRateUseCase.getConvertedCurrencyRates(aed.name, "1").first()
             assertTrue(firstItem is Resource.Loading)
-            val secondItem = currencyRateUseCase.getConvertedCurrencyRates(aed.name,"1").drop(1).first()
+            val secondItem =
+                currencyRateUseCase.getConvertedCurrencyRates(aed.name, "1").drop(1).first()
             assertTrue(secondItem is Resource.Success)
             assertFalse(secondItem.data.isNullOrEmpty())
-            assertEquals(currencyList.size,secondItem.data?.size)
+            assertEquals(currencyList.size, secondItem.data?.size)
             val expected: CurrencyModel? = secondItem.data?.single { s -> s.name == aed.name }
-            assertEquals(1.00,expected?.value)
+            assertEquals(1.00, expected?.value)
         }
-
 
 
     }
 
     @Test
-    fun getConvertedCurrencyRatesErrorTest(){
-        val bdt =CurrencyModel(
+    fun getConvertedCurrencyRatesErrorTest() {
+        val bdt = CurrencyModel(
             name = "BDT",
             value = 95.019544
         )
 
-        val usd =CurrencyModel(
+        val usd = CurrencyModel(
             name = "USD",
             value = 1.0
         )
 
-        val aed =CurrencyModel(
+        val aed = CurrencyModel(
             name = "AED",
             value = 3.673
         )
 
-        val currencyList = listOf<CurrencyModel>(bdt,usd,aed)
+        val currencyList = listOf<CurrencyModel>(bdt, usd, aed)
 
         repository.stub {
             onBlocking { getLatestRates() }.thenReturn(flow {
@@ -163,9 +161,10 @@ class CurrencyRateUseCaseTest {
         }
 
         runBlocking {
-            val firstItem = currencyRateUseCase.getConvertedCurrencyRates("ALL","1").first()
+            val firstItem = currencyRateUseCase.getConvertedCurrencyRates("ALL", "1").first()
             assertTrue(firstItem is Resource.Loading)
-            val secondItem = currencyRateUseCase.getConvertedCurrencyRates("ALL","1").drop(1).first()
+            val secondItem =
+                currencyRateUseCase.getConvertedCurrencyRates("ALL", "1").drop(1).first()
             assertTrue(secondItem is Resource.Error)
             assertFalse(secondItem.message.isNullOrBlank())
         }

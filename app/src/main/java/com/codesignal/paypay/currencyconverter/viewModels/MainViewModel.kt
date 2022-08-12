@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
-import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.DBinitialUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -116,7 +116,7 @@ class MainViewModel @Inject constructor(
                 currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
-                            resource.data?.let {cur->
+                            resource.data?.let { cur ->
                                 _currencyNames.update { cur }
                             }
                         }

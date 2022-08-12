@@ -7,16 +7,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.*
-
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 
 class CurrencyNameUseCaseTest {
-    private val repository :Repository = mock()
-    private lateinit var currencyNameUseCase:CurrencyNameUseCase
+    private val repository: Repository = mock()
+    private lateinit var currencyNameUseCase: CurrencyNameUseCase
 
     @Before
     fun setUp() {
@@ -39,7 +37,7 @@ class CurrencyNameUseCaseTest {
             val second = currencyNameUseCase.getAllCurrencyNames().drop(1).first()
             assertTrue(second is Resource.Success)
             assertFalse(second.data.isNullOrEmpty())
-            assertEquals(expected,second.data)
+            assertEquals(expected, second.data)
         }
     }
 

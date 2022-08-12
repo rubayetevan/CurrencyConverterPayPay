@@ -9,7 +9,7 @@ import javax.inject.Inject
 
 class LocalDataSource @Inject constructor(
     private val currencyModelDao: CurrencyModelDao,
-    private val sharedPreferences: SharedPreferences
+    private val sharedPreferences: SharedPreferences,
 ) {
 
     suspend fun insertAllCurrencies(currencies: List<CurrencyModel>) {
@@ -49,12 +49,12 @@ class LocalDataSource @Inject constructor(
         }
     }
 
-    fun getDBInitializedState():Boolean{
-        return sharedPreferences.getBoolean(KEY_DB_UPDATE,false)
+    fun getDBInitializedState(): Boolean {
+        return sharedPreferences.getBoolean(KEY_DB_UPDATE, false)
     }
 
-    fun savedBInitializedState(value: Boolean){
-        saveDataSharedPref(KEY_DB_UPDATE,value)
+    fun savedBInitializedState(value: Boolean) {
+        saveDataSharedPref(KEY_DB_UPDATE, value)
     }
 
 }

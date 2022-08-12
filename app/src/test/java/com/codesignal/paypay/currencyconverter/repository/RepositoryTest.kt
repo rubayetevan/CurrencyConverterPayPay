@@ -22,15 +22,16 @@ import org.mockito.kotlin.stub
 
 class RepositoryTest {
 
-    private val localDataSource:LocalDataSource = mock()
-    private val remoteDataSource:RemoteDataSource = mock()
-    private val externalScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val localDataSource: LocalDataSource = mock()
+    private val remoteDataSource: RemoteDataSource = mock()
+    private val externalScope: CoroutineScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private lateinit var repository: Repository
 
     @Before
     fun setUp() {
-        repository = Repository(localDataSource,remoteDataSource,externalScope)
+        repository = Repository(localDataSource, remoteDataSource, externalScope)
     }
 
     @Test
@@ -48,8 +49,8 @@ class RepositoryTest {
             val secondItem = repository.getLatestRates().drop(1).first()
             assertTrue(secondItem is Resource.Success)
             assertFalse(secondItem.data.isNullOrEmpty())
-            assertTrue( secondItem.data is List<CurrencyModel>)
-            assertTrue( 169 == secondItem.data?.size)
+            assertTrue(secondItem.data is List<CurrencyModel>)
+            assertTrue(169 == secondItem.data?.size)
         }
     }
 
@@ -88,7 +89,7 @@ class RepositoryTest {
     }
 
     @Test
-    fun getDBInitializedStatePositiveTest(){
+    fun getDBInitializedStatePositiveTest() {
         val expected = true
         Mockito.`when`(localDataSource.getDBInitializedState()).thenReturn(expected)
         val actual = repository.getDbInitializationState()
@@ -96,10 +97,10 @@ class RepositoryTest {
     }
 
     @Test
-    fun getDBInitializedStateNegativeTest(){
+    fun getDBInitializedStateNegativeTest() {
         val expected = false
         Mockito.`when`(localDataSource.getDBInitializedState()).thenReturn(expected)
-        val actual =  repository.getDbInitializationState()
+        val actual = repository.getDbInitializationState()
         Assert.assertEquals(expected, actual)
     }
 
