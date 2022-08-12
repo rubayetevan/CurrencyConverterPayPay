@@ -51,7 +51,7 @@
                 android:autofillHints="Currency Value"
                 android:ems="10"
                 android:inputType="numberDecimal"
-                android:maxLength="16"
+                android:maxLength="14"
                 android:textSize="18sp" />
 
         </com.google.android.material.textfield.TextInputLayout>

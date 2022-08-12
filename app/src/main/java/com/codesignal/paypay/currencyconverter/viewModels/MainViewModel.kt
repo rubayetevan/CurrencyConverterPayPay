@@ -97,21 +97,21 @@ class MainViewModel @Inject constructor(
                         when (resource) {
                             is Resource.Success -> {
                                 resource.data?.let { curList ->
-                                    _dataLoadingState.update {false}
+                                    _dataLoadingState.update { false }
                                     _result.update { curList }
                                 }
                             }
                             is Resource.Error -> {
-                                _dataLoadingState.update {false}
-                                resource.message?.let { msg->
+                                _dataLoadingState.update { false }
+                                resource.message?.let { msg ->
                                     _message.update { msg }
                                 }
                             }
                             is Resource.Loading -> {
-                                _dataLoadingState.update {true}
+                                _dataLoadingState.update { true }
                             }
                             is Resource.Empty -> {
-                                _dataLoadingState.update {false}
+                                _dataLoadingState.update { false }
                                 _message.update { "Sorry! converted rate list is Empty!" }
                             }
                         }
@@ -134,7 +134,7 @@ class MainViewModel @Inject constructor(
                         }
                         is Resource.Error -> {
                             _currencyNameLoadingState.update { false }
-                            resource.message?.let { msg->
+                            resource.message?.let { msg ->
                                 _message.update { msg }
                             }
                         }
@@ -143,7 +143,7 @@ class MainViewModel @Inject constructor(
                         }
                         is Resource.Empty -> {
                             _currencyNameLoadingState.update { false }
-                            resource.message?.let { msg->
+                            resource.message?.let { msg ->
                                 _message.update { "Currency list is Empty!" }
                             }
                         }

@@ -1,5 +1,6 @@
 package com.codesignal.paypay.currencyconverter.repository
 
+import com.codesignal.paypay.currencyconverter.common.utility.DB_UPDATE_TH_MIN
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.local.LocalDataSource
@@ -7,7 +8,7 @@ import com.codesignal.paypay.currencyconverter.repository.remote.RemoteDataSourc
 import com.google.gson.JsonObject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.withContext
 import java.util.*
 import javax.inject.Inject
@@ -22,67 +23,77 @@ class Repository @Inject constructor(
     private var currencyNames: List<String> = ArrayList<String>()
 
     suspend fun getLatestRates(): Flow<Resource<List<CurrencyModel>>> {
-        return flow {
+        return channelFlow {
             if (currencies.isEmpty()) {
-                emit(Resource.Loading())
-
-                val result = withContext(externalScope.coroutineContext) {
-                    remoteDataSource.getLatestRates()
-                }
-
-                if (result is Resource.Success) {
-
-                    val rates: JsonObject? = result.data?.getAsJsonObject("rates")
-
-                    rates?.keySet()?.let {
-                        currencyNames = it.toList()
+                send(Resource.Loading())
+                if (shouldUpdateDB()) {
+                    val result = withContext(externalScope.coroutineContext) {
+                        remoteDataSource.getLatestRates()
                     }
 
-                    rates?.keySet()?.forEach { key ->
-                        val value = rates.get(key).toString()
-                        currencies.add(CurrencyModel(name = key, value = value.toDouble()))
-                    }
+                    if (result is Resource.Success) {
 
-                    val data = Collections.unmodifiableList(currencies)
+                        val rates: JsonObject? = result.data?.getAsJsonObject("rates")
 
-                    if (data.isEmpty()) {
-                        emit(Resource.Empty())
-                    } else {
-                        withContext(externalScope.coroutineContext) {
-                            localDataSource.insertAllCurrencies(currencies = data)
+                        rates?.keySet()?.let {
+                            currencyNames = it.toList()
                         }
-                        val date = Date(System.currentTimeMillis())
-                        localDataSource.saveDbUpdateTime(date)
-                        localDataSource.savedBInitializedState(true)
-                        emit(Resource.Success(data = data))
-                    }
 
-                } else if (result is Resource.Error) {
-                    emit(Resource.Error(result.message ?: "Could not get data."))
+                        rates?.keySet()?.forEach { key ->
+                            val value = rates.get(key).toString()
+                            currencies.add(CurrencyModel(name = key, value = value.toDouble()))
+                        }
+
+                        val data = Collections.unmodifiableList(currencies)
+
+                        if (data.isEmpty()) {
+                            send(Resource.Empty())
+                        } else {
+                            withContext(externalScope.coroutineContext) {
+                                localDataSource.insertAllCurrencies(currencies = data)
+                            }
+                            val date = Date(System.currentTimeMillis())
+                            localDataSource.saveDbUpdateTime(date)
+                            localDataSource.savedBInitializedState(true)
+                            send(Resource.Success(data = data))
+                        }
+
+                    } else if (result is Resource.Error) {
+                        send(Resource.Error(result.message ?: "Could not get data."))
+                    }
+                } else {
+                    withContext(externalScope.coroutineContext) {
+                        val localData = localDataSource.getAllCurrencyModel()
+                        if (localData.isEmpty()) {
+                            send(Resource.Empty())
+                        } else {
+                            send(Resource.Success(data = localData))
+                        }
+                    }
                 }
             } else {
                 val data = Collections.unmodifiableList(currencies)
-                emit(Resource.Success(data = data))
+                send(Resource.Success(data = data))
             }
         }
     }
 
     suspend fun getAllCurrencyNames(): Flow<Resource<List<String>>> {
-        return flow {
-            emit(Resource.Loading())
+        return channelFlow {
+            send(Resource.Loading())
             if (currencyNames.isEmpty()) {
                 currencyNames = withContext(externalScope.coroutineContext) {
                     localDataSource.getAllCurrencyNames()
                 }
                 if (currencyNames.isEmpty()) {
-                    emit(Resource.Empty())
+                    send(Resource.Empty())
                 } else if (currencyNames.isNotEmpty()) {
-                    emit(Resource.Success(data = currencyNames))
+                    send(Resource.Success(data = currencyNames))
                 } else {
-                    emit(Resource.Error(message = "Can not get currency names."))
+                    send(Resource.Error(message = "Can not get currency names."))
                 }
             } else {
-                emit(Resource.Success(data = currencyNames))
+                send(Resource.Success(data = currencyNames))
             }
         }
     }
@@ -90,4 +101,13 @@ class Repository @Inject constructor(
     fun getDbUpdateTime() = localDataSource.getDbUpdateTime()
 
     fun getDbInitializationState() = localDataSource.getDBInitializedState()
+
+    fun shouldUpdateDB(): Boolean {
+        val dbUpdatedTime = getDbUpdateTime()
+        val currentTime = Date(System.currentTimeMillis())
+        val diff: Long = currentTime.time - dbUpdatedTime.time
+        val seconds = diff / 1000
+        val minutes = seconds / 60
+        return minutes >= DB_UPDATE_TH_MIN
+    }
 }

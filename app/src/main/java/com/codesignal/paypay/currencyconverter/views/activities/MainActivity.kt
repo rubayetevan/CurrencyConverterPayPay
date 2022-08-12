@@ -129,8 +129,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupErrorMessageViewer(){
-        lifecycleScope.launch{
+    private fun setupErrorMessageViewer() {
+        lifecycleScope.launch {
             viewModel.message.collect {
                 if (it.isNotEmpty() && it.isNotBlank()) {
                     Toast.makeText(
