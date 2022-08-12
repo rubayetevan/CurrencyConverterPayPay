@@ -5,7 +5,9 @@
     tools:context=".views.activities.MainActivity">
 
     <data>
-        <import type="android.view.View"/>
+
+        <import type="android.view.View" />
+
         <variable
             name="mainViewModel"
             type="com.codesignal.paypay.currencyconverter.viewModels.MainViewModel" />
@@ -35,11 +37,11 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             android:layout_marginEnd="16dp"
+            android:hint="@string/currency"
             android:visibility="@{mainViewModel.dbLoadingState ? View.GONE : View.VISIBLE}"
             app:layout_constraintEnd_toStartOf="@+id/spinner"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:hint="@string/currency">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/currencyET"
@@ -50,17 +52,16 @@
                 android:ems="10"
                 android:inputType="numberDecimal"
                 android:maxLength="16"
-                android:textSize="18sp"
-                />
+                android:textSize="18sp" />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <ProgressBar
-            android:visibility="@{mainViewModel.dbLoadingState ? View.VISIBLE : View.GONE}"
             android:id="@+id/progressBar"
             style="?android:attr/progressBarStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="@{mainViewModel.dbLoadingState ? View.VISIBLE : View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

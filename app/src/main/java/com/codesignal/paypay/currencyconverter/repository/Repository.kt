@@ -35,7 +35,7 @@ class Repository @Inject constructor(
                     val rates: JsonObject? = result.data?.getAsJsonObject("rates")
 
                     rates?.keySet()?.let {
-                        currencyNames =it.toList()
+                        currencyNames = it.toList()
                     }
 
                     rates?.keySet()?.forEach { key ->
@@ -45,9 +45,9 @@ class Repository @Inject constructor(
 
                     val data = Collections.unmodifiableList(currencies)
 
-                    if(data.isEmpty()){
+                    if (data.isEmpty()) {
                         emit(Resource.Empty())
-                    }else {
+                    } else {
                         withContext(externalScope.coroutineContext) {
                             localDataSource.insertAllCurrencies(currencies = data)
                         }

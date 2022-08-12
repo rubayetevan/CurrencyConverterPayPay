@@ -15,7 +15,7 @@ import org.junit.runner.RunWith
 import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
-class AppDatabaseTest{
+class AppDatabaseTest {
     private lateinit var currencyModelDao: CurrencyModelDao
     private lateinit var db: AppDatabase
 
@@ -46,10 +46,10 @@ class AppDatabaseTest{
         runBlocking {
             currencyModelDao.insertAll(currencyModels)
             val allCurrencies = currencyModelDao.getAllCurrencies()
-            assertEquals(currencyModels,allCurrencies)
+            assertEquals(currencyModels, allCurrencies)
 
             val currencyNames = currencyModelDao.getAllCurrencyNames()
-            assertTrue(currencyNames.size==1)
+            assertTrue(currencyNames.size == 1)
             assertEquals(currencyModel.name, currencyNames[0])
         }
 

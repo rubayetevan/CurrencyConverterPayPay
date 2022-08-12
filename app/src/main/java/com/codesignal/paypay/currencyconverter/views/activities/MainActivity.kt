@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         // Network capabilities have changed for the network
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            networkCapabilities: NetworkCapabilities,
         ) {
             super.onCapabilitiesChanged(network, networkCapabilities)
             val hasCellular =
@@ -96,19 +96,19 @@ class MainActivity : AppCompatActivity() {
                 parent: AdapterView<*>?,
                 view: View?,
                 position: Int,
-                id: Long
+                id: Long,
             ) {
                 if (viewModel.fromCurrencyPosition != position) {
                     viewModel.fromCurrencyPosition = position
                     viewModel.getCurrencyConvertedValue()
                 }
 
-                try {val a :TextView = parent?.getChildAt(0) as TextView
+                try {
+                    val a: TextView = parent?.getChildAt(0) as TextView
                     a.textSize = 18f
-                }catch (e:Exception){
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
-
 
 
             }
