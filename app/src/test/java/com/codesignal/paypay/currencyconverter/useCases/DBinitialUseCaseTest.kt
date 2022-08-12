@@ -42,18 +42,17 @@ class DBinitialUseCaseTest {
         assertEquals(expected, actual)
     }
 
+
     @Test
     fun shouldUpdateDbPositiveTest() {
-        val dbUpdateTime = Date(1500241092536)
-        Mockito.`when`(repository.getDbUpdateTime()).thenReturn(dbUpdateTime)
+        Mockito.`when`(repository.shouldUpdateDB()).thenReturn(true)
         val actual = dBinitialUseCase.shouldUpdateDB()
         assertTrue(actual)
     }
 
     @Test
     fun shouldUpdateDbNegativeTest() {
-        val dbUpdateTime = Date(System.currentTimeMillis())
-        Mockito.`when`(repository.getDbUpdateTime()).thenReturn(dbUpdateTime)
+        Mockito.`when`(repository.shouldUpdateDB()).thenReturn(false)
         val actual = dBinitialUseCase.shouldUpdateDB()
         assertFalse(actual)
     }

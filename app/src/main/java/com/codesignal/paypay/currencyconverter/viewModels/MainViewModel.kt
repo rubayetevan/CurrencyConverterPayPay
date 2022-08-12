@@ -33,6 +33,16 @@ class MainViewModel @Inject constructor(
     private val _internetState = MutableSharedFlow<Boolean>(replay = 0)
     val internetState: SharedFlow<Boolean> = _internetState.asSharedFlow()
 
+    private val _dataLoadingState = MutableStateFlow(false)
+    val dataLoadingState: StateFlow<Boolean> = _dataLoadingState.asStateFlow()
+
+    private val _message = MutableStateFlow(String())
+    val message: StateFlow<String> = _message.asStateFlow()
+
+    private val _currencyNameLoadingState = MutableStateFlow(false)
+    val currencyNameLoadingState: StateFlow<Boolean> = _currencyNameLoadingState.asStateFlow()
+
+
     var fromCurrencyPosition: Int = 0
     var currencyValue = "0.00"
 
@@ -49,7 +59,6 @@ class MainViewModel @Inject constructor(
             internetState.collect {
                 if (it) {
                     if (dBinitialUseCase.shouldUpdateDB()) {
-                        _dbLoadingState.update { true }
                         currencyRateUseCase.getLatestRates().collect { value ->
                             when (value) {
                                 is Resource.Success -> {
@@ -67,9 +76,6 @@ class MainViewModel @Inject constructor(
                                 }
                             }
                         }
-
-                    } else {
-                        _dbLoadingState.update { false }
                     }
                 }
             }
@@ -91,17 +97,22 @@ class MainViewModel @Inject constructor(
                         when (resource) {
                             is Resource.Success -> {
                                 resource.data?.let { curList ->
+                                    _dataLoadingState.update { false }
                                     _result.update { curList }
                                 }
                             }
                             is Resource.Error -> {
-
+                                _dataLoadingState.update { false }
+                                resource.message?.let { msg ->
+                                    _message.update { msg }
+                                }
                             }
                             is Resource.Loading -> {
-
+                                _dataLoadingState.update { true }
                             }
                             is Resource.Empty -> {
-
+                                _dataLoadingState.update { false }
+                                _message.update { "Sorry! converted rate list is Empty!" }
                             }
                         }
                     }
@@ -116,18 +127,25 @@ class MainViewModel @Inject constructor(
                 currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
+                            _currencyNameLoadingState.update { false }
                             resource.data?.let { cur ->
                                 _currencyNames.update { cur }
                             }
                         }
                         is Resource.Error -> {
-
+                            _currencyNameLoadingState.update { false }
+                            resource.message?.let { msg ->
+                                _message.update { msg }
+                            }
                         }
                         is Resource.Loading -> {
-
+                            _currencyNameLoadingState.update { true }
                         }
                         is Resource.Empty -> {
-
+                            _currencyNameLoadingState.update { false }
+                            resource.message?.let { msg ->
+                                _message.update { "Currency list is Empty!" }
+                            }
                         }
                     }
                 }

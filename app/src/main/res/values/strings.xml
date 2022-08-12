@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Currency Converter</string>
+    <string name="app_name">PayPay CC</string>
     <string name="_0.00">0.00</string>
     <string name="currency">Currency</string>
 </resources>

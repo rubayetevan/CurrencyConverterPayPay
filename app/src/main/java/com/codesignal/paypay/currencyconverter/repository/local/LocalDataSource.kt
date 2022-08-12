@@ -26,6 +26,8 @@ class LocalDataSource @Inject constructor(
         saveDataSharedPref(KEY_DB_UPDATE_TIME, date.time)
     }
 
+    suspend fun getAllCurrencyModel(): List<CurrencyModel> = currencyModelDao.getAllCurrencies()
+
     private fun saveDataSharedPref(key: String, data: Any) {
         when (data) {
             is Long -> {
