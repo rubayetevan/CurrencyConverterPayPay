@@ -9,19 +9,18 @@ import kotlinx.coroutines.flow.flow
 import java.util.*
 import javax.inject.Inject
 
-class CurrencyConvertUseCase @Inject constructor(private val repository: Repository) {
+class CurrencyRateUseCase @Inject constructor(private val repository: Repository) {
 
     companion object{
         const val TAG: String = "CCUseCase"
     }
 
-    suspend fun getConvertedCurrency(
+    suspend fun getConvertedCurrencyRates(
         from: String,
         currencyValue:String
     ): Flow<Resource<List<CurrencyModel>>> {
         return flow {
 
-            emit(Resource.Loading<List<CurrencyModel>>())
             val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
             else currencyValue.trim().toDouble()
 

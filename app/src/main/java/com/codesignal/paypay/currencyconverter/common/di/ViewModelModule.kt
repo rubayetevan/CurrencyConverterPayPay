@@ -2,7 +2,7 @@ package com.codesignal.paypay.currencyconverter.common.di
 
 import com.codesignal.paypay.currencyconverter.common.utility.Validators
 import com.codesignal.paypay.currencyconverter.repository.Repository
-import com.codesignal.paypay.currencyconverter.useCases.CurrencyConvertUseCase
+import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
 import dagger.Module
 import dagger.Provides
@@ -20,8 +20,8 @@ object ViewModelModule {
     }
 
     @Provides
-    fun provideCurrencyConvertUseCase(repository: Repository):CurrencyConvertUseCase{
-        return CurrencyConvertUseCase(repository)
+    fun provideCurrencyRateUseCase(repository: Repository):CurrencyRateUseCase{
+        return CurrencyRateUseCase(repository)
     }
 
     @Provides
