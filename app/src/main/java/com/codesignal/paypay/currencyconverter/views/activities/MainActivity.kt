@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
         binding.mainViewModel = viewModel
         val view = binding.root
         setContentView(view)
-
+        setupErrorMessageViewer()
         setupNetworkMonitor()
         setupSpinner()
         setupRV()
@@ -125,6 +125,20 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.result.collect {
                 currencyAdapter.setData(it)
+            }
+        }
+    }
+
+    private fun setupErrorMessageViewer(){
+        lifecycleScope.launch{
+            viewModel.message.collect {
+                if (it.isNotEmpty() && it.isNotBlank()) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        it,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
     }
