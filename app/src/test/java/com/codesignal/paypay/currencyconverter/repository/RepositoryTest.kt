@@ -11,14 +11,11 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
-import java.util.*
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.*
 
 class RepositoryTest {
 
@@ -32,6 +29,18 @@ class RepositoryTest {
     @Before
     fun setUp() {
         repository = Repository(localDataSource, remoteDataSource, externalScope)
+    }
+
+    @Test
+    fun insertAllCurrenciesTest(){
+        val input = listOf<CurrencyModel>()
+        localDataSource.stub {
+            onBlocking { insertAllCurrencies(input) }.thenReturn(anyOrNull())
+        }
+        runBlocking {
+            localDataSource.insertAllCurrencies(input)
+            verify(localDataSource, times(1)).insertAllCurrencies(input)
+        }
     }
 
     @Test
@@ -89,7 +98,7 @@ class RepositoryTest {
     @Test
     fun getDBInitializedStatePositiveTest() {
         val expected = true
-        Mockito.`when`(localDataSource.getDBInitializedState()).thenReturn(expected)
+        `when`(localDataSource.getDBInitializedState()).thenReturn(expected)
         val actual = repository.getDbInitializationState()
         assertEquals(expected, actual)
     }
@@ -97,7 +106,7 @@ class RepositoryTest {
     @Test
     fun getDBInitializedStateNegativeTest() {
         val expected = false
-        Mockito.`when`(localDataSource.getDBInitializedState()).thenReturn(expected)
+        `when`(localDataSource.getDBInitializedState()).thenReturn(expected)
         val actual = repository.getDbInitializationState()
         assertEquals(expected, actual)
     }
@@ -159,9 +168,12 @@ class RepositoryTest {
 
     @Test
     fun getAllCurrencyNamesSuccessTest() {
+        val expected = listOf("BDT", "USD", "AUD")
+        localDataSource.stub {
+            onBlocking { localDataSource.getAllCurrencyNames() }.thenReturn(expected)
+        }
+
         runBlocking {
-            val expected = listOf("BDT", "USD", "AUD")
-            Mockito.`when`(localDataSource.getAllCurrencyNames()).thenReturn(expected)
             val actual = repository.getAllCurrencyNames()
             val first = actual.first()
             assertTrue(first is Resource.Loading)
@@ -176,7 +188,7 @@ class RepositoryTest {
     fun getAllCurrencyNamesEmptyTest() {
         runBlocking {
             val expected = emptyList<String>()
-            Mockito.`when`(localDataSource.getAllCurrencyNames()).thenReturn(expected)
+            `when`(localDataSource.getAllCurrencyNames()).thenReturn(expected)
             val actual = repository.getAllCurrencyNames()
             val first = actual.first()
             assertTrue(first is Resource.Loading)

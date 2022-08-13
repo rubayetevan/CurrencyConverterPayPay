@@ -9,7 +9,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito
-import org.mockito.kotlin.stub
+import org.mockito.kotlin.*
 import java.util.*
 
 class LocalDataSourceTest {
@@ -21,6 +21,18 @@ class LocalDataSourceTest {
     @Before
     fun setUp() {
         localDataSource = LocalDataSource(currencyModelDao, sharedPreferences)
+    }
+
+    @Test
+    fun insertAllCurrenciesTest(){
+        val input = listOf<CurrencyModel>()
+        currencyModelDao.stub {
+            onBlocking { insertAll(input) }.thenReturn(anyOrNull())
+        }
+        runBlocking {
+            currencyModelDao.insertAll(input)
+            verify(currencyModelDao, times(1)).insertAll(input)
+        }
     }
 
     @Test
