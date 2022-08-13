@@ -1,5 +1,6 @@
 package com.codesignal.paypay.currencyconverter.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
@@ -9,7 +10,10 @@ import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
 import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.DBinitialUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,9 +34,6 @@ class MainViewModel @Inject constructor(
     private val _dbLoadingState = MutableStateFlow(false)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
 
-    private val _internetState = MutableSharedFlow<Boolean>(replay = 0)
-    val internetState: SharedFlow<Boolean> = _internetState.asSharedFlow()
-
     private val _dataLoadingState = MutableStateFlow(false)
     val dataLoadingState: StateFlow<Boolean> = _dataLoadingState.asStateFlow()
 
@@ -41,6 +42,9 @@ class MainViewModel @Inject constructor(
 
     private val _currencyNameLoadingState = MutableStateFlow(false)
     val currencyNameLoadingState: StateFlow<Boolean> = _currencyNameLoadingState.asStateFlow()
+
+    private val _internetState = MutableStateFlow(false)
+    val internetState: StateFlow<Boolean> = _internetState.asStateFlow()
 
 
     var fromCurrencyPosition: Int = 0
@@ -57,37 +61,43 @@ class MainViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             internetState.collect {
-                if (it) {
-                    if (dBinitialUseCase.shouldUpdateDB()) {
-                        currencyRateUseCase.getLatestRates().collect { value ->
-                            when (value) {
-                                is Resource.Success -> {
-                                    _dbLoadingState.update { false }
-                                    getCurrencyNames()
-                                }
-                                is Resource.Error -> {
-                                    _dbLoadingState.update { false }
-                                }
-                                is Resource.Loading -> {
-                                    _dbLoadingState.update { true }
-                                }
-                                is Resource.Empty -> {
-                                    _dbLoadingState.update { false }
-                                }
-                            }
-                        }
-                    }
+                if (it)
+                    updateOrInitializeDB()
+            }
+        }
+        viewModelScope.launch {
+            dbLoadingState.collect { st ->
+                if (!st && dBinitialUseCase.getDbInitializationState()) {
+                    getCurrencyNames()
                 }
             }
         }
+    }
 
-        if (!dbLoadingState.value) {
-            getCurrencyNames()
+    private suspend fun updateOrInitializeDB() {
+        dBinitialUseCase.updateOrInitializeDB().collect { value ->
+            when (value) {
+                is Resource.Success -> {
+                    _dbLoadingState.update { false }
+                }
+                is Resource.Error -> {
+                    _dbLoadingState.update { false }
+                    value.message?.let {
+                        _message.update { it }
+                    }
+                }
+                is Resource.Loading -> {
+                    _dbLoadingState.update { true }
+                }
+                is Resource.Empty -> {
+                    _dbLoadingState.update { false }
+                }
+            }
         }
     }
 
     fun getCurrencyConvertedValue() {
-        if (dBinitialUseCase.getDbInitializationState()) {
+        if (dBinitialUseCase.getDbInitializationState() && !dbLoadingState.value) {
             if (currencyNames.value.isNotEmpty()) {
                 viewModelScope.launch {
                     currencyRateUseCase.getConvertedCurrencyRates(
@@ -122,7 +132,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getCurrencyNames() {
-        if (dBinitialUseCase.getDbInitializationState()) {
+        if (dBinitialUseCase.getDbInitializationState() && !dbLoadingState.value) {
             viewModelScope.launch {
                 currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
@@ -153,11 +163,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun hasInternet(b: Boolean) {
-        viewModelScope.launch {
-            _internetState.emit(b)
+
+    fun setInterNetState(state: Boolean) {
+        if (!internetState.value && state) {
+            _internetState.update { true }
+        } else if (internetState.value && !state) {
+            _internetState.update { false }
         }
     }
-
 
 }

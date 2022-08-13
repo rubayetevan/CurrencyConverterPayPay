@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         // network is available for use
         override fun onAvailable(network: Network) {
             super.onAvailable(network)
-            viewModel.hasInternet(true)
+            viewModel.setInterNetState(true)
         }
 
         // Network capabilities have changed for the network
@@ -42,17 +42,17 @@ class MainActivity : AppCompatActivity() {
                 networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
             val hasWifi = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)
 
-            viewModel.hasInternet(hasCellular || hasWifi)
-
-
+            if(hasWifi || hasCellular)
+                viewModel.setInterNetState(true)
+            else
+                viewModel.setInterNetState(false)
         }
 
         // lost network connection
         override fun onLost(network: Network) {
             super.onLost(network)
-            viewModel.hasInternet(false)
+            viewModel.setInterNetState(false)
             showNoInternetToast()
-
         }
     }
 
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
         val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val activeNetwork: NetworkInfo? = cm.activeNetworkInfo
         val isConnected: Boolean = activeNetwork?.isConnectedOrConnecting == true
-        viewModel.hasInternet(isConnected)
+
         if (!isConnected)
             showNoInternetToast()
 

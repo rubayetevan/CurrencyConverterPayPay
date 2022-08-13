@@ -23,75 +23,75 @@ class CurrencyRateUseCaseTest {
         currencyRateUseCase = CurrencyRateUseCase(repository)
     }
 
-    @Test
-    fun getLatestRatesSuccessTest() {
-        val bdt = CurrencyModel(
-            name = "BDT",
-            value = 95.019544
-        )
-
-        val usd = CurrencyModel(
-            name = "USD",
-            value = 1.0
-        )
-
-        val expected = listOf<CurrencyModel>(bdt, usd)
-
-        repository.stub {
-            onBlocking { getLatestRates() }.thenReturn(flow {
-                emit(Resource.Loading())
-                emit(Resource.Success(data = expected))
-            })
-        }
-
-        runBlocking {
-            val firstItem = currencyRateUseCase.getLatestRates().first()
-            assertTrue(firstItem is Resource.Loading)
-            val secondItem = repository.getLatestRates().drop(1).first()
-            assertTrue(secondItem is Resource.Success)
-            assertFalse(secondItem.data.isNullOrEmpty())
-            assertTrue(secondItem.data is List<CurrencyModel>)
-            assertTrue(2 == secondItem.data?.size)
-        }
-    }
-
-    @Test
-    fun getLatestRatesEmptyTest() {
-        repository.stub {
-            onBlocking { getLatestRates() }.thenReturn(flow {
-                emit(Resource.Loading())
-                emit(Resource.Empty())
-            })
-        }
-
-        runBlocking {
-            val firstItem = currencyRateUseCase.getLatestRates().first()
-            assertTrue(firstItem is Resource.Loading)
-            val secondItem = repository.getLatestRates().drop(1).first()
-            assertTrue(secondItem is Resource.Empty)
-            assertTrue(secondItem.data.isNullOrEmpty())
-        }
-    }
-
-    @Test
-    fun getLatestRatesErrorTest() {
-        val msg = "Couldn't get the latest rates"
-        repository.stub {
-            onBlocking { getLatestRates() }.thenReturn(flow {
-                emit(Resource.Loading())
-                emit(Resource.Error(msg))
-            })
-        }
-
-        runBlocking {
-            val firstItem = currencyRateUseCase.getLatestRates().first()
-            assertTrue(firstItem is Resource.Loading)
-            val secondItem = repository.getLatestRates().drop(1).first()
-            assertTrue(secondItem is Resource.Error)
-            assertTrue(secondItem.data.isNullOrEmpty())
-            assertEquals(msg, secondItem.message)
-        }
-    }
+//    @Test
+//    fun getLatestRatesSuccessTest() {
+//        val bdt = CurrencyModel(
+//            name = "BDT",
+//            value = 95.019544
+//        )
+//
+//        val usd = CurrencyModel(
+//            name = "USD",
+//            value = 1.0
+//        )
+//
+//        val expected = listOf<CurrencyModel>(bdt, usd)
+//
+//        repository.stub {
+//            onBlocking { getLatestRates() }.thenReturn(flow {
+//                emit(Resource.Loading())
+//                emit(Resource.Success(data = expected))
+//            })
+//        }
+//
+//        runBlocking {
+//            val firstItem = currencyRateUseCase.getLatestRates().first()
+//            assertTrue(firstItem is Resource.Loading)
+//            val secondItem = repository.getLatestRates().drop(1).first()
+//            assertTrue(secondItem is Resource.Success)
+//            assertFalse(secondItem.data.isNullOrEmpty())
+//            assertTrue(secondItem.data is List<CurrencyModel>)
+//            assertTrue(2 == secondItem.data?.size)
+//        }
+//    }
+//
+//    @Test
+//    fun getLatestRatesEmptyTest() {
+//        repository.stub {
+//            onBlocking { getLatestRates() }.thenReturn(flow {
+//                emit(Resource.Loading())
+//                emit(Resource.Empty())
+//            })
+//        }
+//
+//        runBlocking {
+//            val firstItem = currencyRateUseCase.getLatestRates().first()
+//            assertTrue(firstItem is Resource.Loading)
+//            val secondItem = repository.getLatestRates().drop(1).first()
+//            assertTrue(secondItem is Resource.Empty)
+//            assertTrue(secondItem.data.isNullOrEmpty())
+//        }
+//    }
+//
+//    @Test
+//    fun getLatestRatesErrorTest() {
+//        val msg = "Couldn't get the latest rates"
+//        repository.stub {
+//            onBlocking { getLatestRates() }.thenReturn(flow {
+//                emit(Resource.Loading())
+//                emit(Resource.Error(msg))
+//            })
+//        }
+//
+//        runBlocking {
+//            val firstItem = currencyRateUseCase.getLatestRates().first()
+//            assertTrue(firstItem is Resource.Loading)
+//            val secondItem = repository.getLatestRates().drop(1).first()
+//            assertTrue(secondItem is Resource.Error)
+//            assertTrue(secondItem.data.isNullOrEmpty())
+//            assertEquals(msg, secondItem.message)
+//        }
+//    }
 
     @Test
     fun getConvertedCurrencyRatesSuccessTest() {
