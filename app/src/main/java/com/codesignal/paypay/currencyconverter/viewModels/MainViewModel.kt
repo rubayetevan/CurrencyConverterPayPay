@@ -1,5 +1,6 @@
 package com.codesignal.paypay.currencyconverter.viewModels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
@@ -9,7 +10,10 @@ import com.codesignal.paypay.currencyconverter.useCases.CurrencyNameUseCase
 import com.codesignal.paypay.currencyconverter.useCases.CurrencyRateUseCase
 import com.codesignal.paypay.currencyconverter.useCases.DBinitialUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -39,6 +43,9 @@ class MainViewModel @Inject constructor(
     private val _currencyNameLoadingState = MutableStateFlow(false)
     val currencyNameLoadingState: StateFlow<Boolean> = _currencyNameLoadingState.asStateFlow()
 
+    private val _internetState = MutableStateFlow(false)
+    val internetState: StateFlow<Boolean> = _internetState.asStateFlow()
+
 
     var fromCurrencyPosition: Int = 0
     var currencyValue = "0.00"
@@ -53,9 +60,14 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            updateOrInitializeDB()
-            dbLoadingState.collect {
-                if (!it && dBinitialUseCase.getDbInitializationState()) {
+            internetState.collect {
+                if (it)
+                    updateOrInitializeDB()
+            }
+        }
+        viewModelScope.launch {
+            dbLoadingState.collect { st ->
+                if (!st && dBinitialUseCase.getDbInitializationState()) {
                     getCurrencyNames()
                 }
             }
@@ -151,5 +163,13 @@ class MainViewModel @Inject constructor(
         }
     }
 
+
+    fun setInterNetState(state: Boolean) {
+        if (!internetState.value && state) {
+            _internetState.update { true }
+        } else if (internetState.value && !state) {
+            _internetState.update { false }
+        }
+    }
 
 }

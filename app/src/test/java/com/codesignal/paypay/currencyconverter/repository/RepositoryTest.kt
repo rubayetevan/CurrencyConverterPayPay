@@ -122,30 +122,22 @@ class RepositoryTest {
         }
     }
 
+    @Test
+    fun updateOrInitializeDbEmptyTest(){
+        val json = "{}"
+        val jsonObject = JsonParser().parse(json).asJsonObject
 
+        remoteDataSource.stub {
+            onBlocking { getLatestRates() }.thenReturn(Resource.Success(data = jsonObject))
+        }
 
-
-
-
-
-
-
-
-//    @Test
-//    fun shouldUpdateDbPositiveTest() {
-//        val dbUpdateTime = Date(1500241092536)
-//        Mockito.`when`(localDataSource.getDbUpdateTime()).thenReturn(dbUpdateTime)
-//        val actual = repository.shouldUpdateDB()
-//        assertTrue(actual)
-//    }
-
-//    @Test
-//    fun shouldUpdateDbNegativeTest() {
-//        val dbUpdateTime = Date(System.currentTimeMillis())
-//        Mockito.`when`(localDataSource.getDbUpdateTime()).thenReturn(dbUpdateTime)
-//        val actual = repository.shouldUpdateDB()
-//        assertFalse(actual)
-//    }
+        runBlocking {
+            val first = repository.updateOrInitializeDB().first()
+            assertTrue(first is Resource.Loading)
+            val second = repository.updateOrInitializeDB().drop(1).first()
+            assertTrue(second is Resource.Empty)
+        }
+    }
 
     @Test
     fun getAllCurrencyNamesSuccessTest() {
