@@ -30,9 +30,6 @@ class MainViewModel @Inject constructor(
     private val _dbLoadingState = MutableStateFlow(false)
     val dbLoadingState: StateFlow<Boolean> = _dbLoadingState.asStateFlow()
 
-    private val _internetState = MutableSharedFlow<Boolean>(replay = 0)
-    val internetState: SharedFlow<Boolean> = _internetState.asSharedFlow()
-
     private val _dataLoadingState = MutableStateFlow(false)
     val dataLoadingState: StateFlow<Boolean> = _dataLoadingState.asStateFlow()
 
@@ -56,38 +53,39 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            internetState.collect {
-                if (it) {
-                    if (dBinitialUseCase.shouldUpdateDB()) {
-                        currencyRateUseCase.getLatestRates().collect { value ->
-                            when (value) {
-                                is Resource.Success -> {
-                                    _dbLoadingState.update { false }
-                                    getCurrencyNames()
-                                }
-                                is Resource.Error -> {
-                                    _dbLoadingState.update { false }
-                                }
-                                is Resource.Loading -> {
-                                    _dbLoadingState.update { true }
-                                }
-                                is Resource.Empty -> {
-                                    _dbLoadingState.update { false }
-                                }
-                            }
-                        }
-                    }
+            updateOrInitializeDB()
+            dbLoadingState.collect {
+                if (!it && dBinitialUseCase.getDbInitializationState()) {
+                    getCurrencyNames()
                 }
             }
         }
+    }
 
-        if (!dbLoadingState.value) {
-            getCurrencyNames()
+    private suspend fun updateOrInitializeDB() {
+        dBinitialUseCase.updateOrInitializeDB().collect { value ->
+            when (value) {
+                is Resource.Success -> {
+                    _dbLoadingState.update { false }
+                }
+                is Resource.Error -> {
+                    _dbLoadingState.update { false }
+                    value.message?.let {
+                        _message.update { it }
+                    }
+                }
+                is Resource.Loading -> {
+                    _dbLoadingState.update { true }
+                }
+                is Resource.Empty -> {
+                    _dbLoadingState.update { false }
+                }
+            }
         }
     }
 
     fun getCurrencyConvertedValue() {
-        if (dBinitialUseCase.getDbInitializationState()) {
+        if (dBinitialUseCase.getDbInitializationState() && !dbLoadingState.value) {
             if (currencyNames.value.isNotEmpty()) {
                 viewModelScope.launch {
                     currencyRateUseCase.getConvertedCurrencyRates(
@@ -122,7 +120,7 @@ class MainViewModel @Inject constructor(
     }
 
     private fun getCurrencyNames() {
-        if (dBinitialUseCase.getDbInitializationState()) {
+        if (dBinitialUseCase.getDbInitializationState() && !dbLoadingState.value) {
             viewModelScope.launch {
                 currencyNameUseCase.getAllCurrencyNames().collect { resource ->
                     when (resource) {
@@ -150,12 +148,6 @@ class MainViewModel @Inject constructor(
                     }
                 }
             }
-        }
-    }
-
-    fun hasInternet(b: Boolean) {
-        viewModelScope.launch {
-            _internetState.emit(b)
         }
     }
 

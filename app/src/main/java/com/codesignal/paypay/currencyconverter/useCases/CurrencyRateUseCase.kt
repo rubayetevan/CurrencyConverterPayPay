@@ -1,6 +1,5 @@
 package com.codesignal.paypay.currencyconverter.useCases
 
-import android.util.Log
 import com.codesignal.paypay.currencyconverter.common.utility.Resource
 import com.codesignal.paypay.currencyconverter.models.CurrencyModel
 import com.codesignal.paypay.currencyconverter.repository.Repository
@@ -11,10 +10,6 @@ import javax.inject.Inject
 
 class CurrencyRateUseCase @Inject constructor(private val repository: Repository) {
 
-    companion object {
-        const val TAG: String = "CCUseCase"
-    }
-
     suspend fun getConvertedCurrencyRates(
         from: String,
         currencyValue: String,
@@ -24,7 +19,7 @@ class CurrencyRateUseCase @Inject constructor(private val repository: Repository
             val value: Double = if (currencyValue.isBlank() || currencyValue.isEmpty()) 0.00
             else currencyValue.trim().toDouble()
 
-            getLatestRates().collect { it ->
+            repository.getLatestRates().collect { it ->
                 when (it) {
                     is Resource.Success<List<CurrencyModel>> -> {
                         val currencies = it.data
@@ -55,13 +50,11 @@ class CurrencyRateUseCase @Inject constructor(private val repository: Repository
                     is Resource.Loading -> {
                         emit(Resource.Loading<List<CurrencyModel>>())
                     }
-                    else -> {
-                        Log.d(TAG, "Can't convert the currency $value $from")
+                    is Resource.Empty->{
+                        emit(Resource.Empty())
                     }
                 }
             }
         }
     }
-
-    suspend fun getLatestRates() = repository.getLatestRates()
 }
