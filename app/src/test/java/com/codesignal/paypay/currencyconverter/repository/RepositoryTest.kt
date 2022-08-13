@@ -140,6 +140,24 @@ class RepositoryTest {
     }
 
     @Test
+    fun updateOrInitializeDbErrorTest(){
+
+        val message = "404 not found"
+
+        remoteDataSource.stub {
+            onBlocking { getLatestRates() }.thenReturn(Resource.Error(message=message))
+        }
+
+        runBlocking {
+            val first = repository.updateOrInitializeDB().first()
+            assertTrue(first is Resource.Loading)
+            val second = repository.updateOrInitializeDB().drop(1).first()
+            assertTrue(second is Resource.Error)
+            assertEquals(message,second.message)
+        }
+    }
+
+    @Test
     fun getAllCurrencyNamesSuccessTest() {
         runBlocking {
             val expected = listOf("BDT", "USD", "AUD")

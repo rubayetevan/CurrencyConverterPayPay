@@ -109,4 +109,5 @@ class Repository @Inject constructor(
     fun getDbUpdateTime() = localDataSource.getDbUpdateTime()
 
     fun getDbInitializationState() = localDataSource.getDBInitializedState()
+
 }

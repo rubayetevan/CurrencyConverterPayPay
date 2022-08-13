@@ -51,15 +51,18 @@ class DBinitialUseCaseTest {
 
     @Test
     fun shouldUpdateDbPositiveTest() {
-        val expected = Date(System.currentTimeMillis())
+        val expected = Date(1550387992465)
         Mockito.`when`(repository.getDbUpdateTime()).thenReturn(expected)
+        val result = dBinitialUseCase.shouldUpdateDB()
+        assertTrue(result)
     }
 
     @Test
     fun shouldUpdateDbNegativeTest() {
         val expected = Date(System.currentTimeMillis())
         Mockito.`when`(repository.getDbUpdateTime()).thenReturn(expected)
-
+        val result = dBinitialUseCase.shouldUpdateDB()
+        assertFalse(result)
     }
 
     @Test
@@ -99,6 +102,29 @@ class DBinitialUseCaseTest {
             val second =  dBinitialUseCase.updateOrInitializeDB().drop(1).first()
             assertTrue(second is Resource.Success)
             assertEquals(currencyList,second.data)
+        }
+    }
+
+    @Test
+    fun updateOrInitializeDbEmptyTest(){
+
+        val expected = Date(1550387992465)
+        Mockito.`when`(repository.getDbUpdateTime()).thenReturn(expected)
+
+        repository.stub {
+            onBlocking { updateOrInitializeDB() }.thenReturn(
+                flow {
+                    emit(Resource.Loading())
+                    emit(Resource.Empty())
+                }
+            )
+        }
+
+        runBlocking {
+            val first =  dBinitialUseCase.updateOrInitializeDB().first()
+            assertTrue(first is Resource.Loading)
+            val second =  dBinitialUseCase.updateOrInitializeDB().drop(1).first()
+            assertTrue(second is Resource.Empty)
         }
 
     }
