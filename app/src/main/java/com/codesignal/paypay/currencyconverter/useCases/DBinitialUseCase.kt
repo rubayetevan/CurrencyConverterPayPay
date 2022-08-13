@@ -25,7 +25,6 @@ class DBinitialUseCase @Inject constructor(private val repository: Repository) {
 
     suspend fun updateOrInitializeDB(): Flow<Resource<List<CurrencyModel>>> {
         return channelFlow {
-            send(Resource.Loading())
             if(shouldUpdateDB()){
                 repository.updateOrInitializeDB().collect{ resource->
                     when (resource) {

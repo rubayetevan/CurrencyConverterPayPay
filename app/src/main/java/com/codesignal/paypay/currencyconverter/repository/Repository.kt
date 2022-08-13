@@ -24,9 +24,12 @@ class Repository @Inject constructor(
     suspend fun getLatestRates(): Flow<Resource<List<CurrencyModel>>> {
         return channelFlow {
             send(Resource.Loading())
-            if (currencies.isEmpty()) {
-                currencies = withContext(externalScope.coroutineContext) {
-                        localDataSource.getAllCurrencyModel() as MutableList<CurrencyModel> }
+            if (currencies.isNullOrEmpty()) {
+                val localData = withContext(externalScope.coroutineContext) {
+                    localDataSource.getAllCurrencyModel()
+                }
+                if (!localData.isNullOrEmpty())
+                    currencies = localData as MutableList<CurrencyModel>
                 if (currencies.isEmpty()) {
                     send(Resource.Empty())
                 } else {
@@ -62,43 +65,44 @@ class Repository @Inject constructor(
 
     suspend fun updateOrInitializeDB(): Flow<Resource<List<CurrencyModel>>> {
         return channelFlow {
-                val result = withContext(externalScope.coroutineContext) {
-                    remoteDataSource.getLatestRates()
+            send(Resource.Loading())
+            val result = withContext(externalScope.coroutineContext) {
+                remoteDataSource.getLatestRates()
+            }
+
+            if (result is Resource.Success) {
+                val rates: JsonObject? = result.data?.getAsJsonObject("rates")
+
+                rates?.keySet()?.let {
+                    currencyNames = it.toList()
                 }
 
-                if (result is Resource.Success) {
-                    val rates: JsonObject? = result.data?.getAsJsonObject("rates")
+                rates?.keySet()?.forEach { key ->
+                    val value = rates.get(key).toString()
+                    currencies.add(CurrencyModel(name = key, value = value.toDouble()))
+                }
 
-                    rates?.keySet()?.let {
-                        currencyNames = it.toList()
-                    }
+                val data = Collections.unmodifiableList(currencies)
 
-                    rates?.keySet()?.forEach { key ->
-                        val value = rates.get(key).toString()
-                        currencies.add(CurrencyModel(name = key, value = value.toDouble()))
-                    }
-
-                    val data = Collections.unmodifiableList(currencies)
-
-                    if (data.isEmpty()) {
-                        send(Resource.Empty())
-                    } else {
-                        withContext(externalScope.coroutineContext) {
-                            localDataSource.insertAllCurrencies(currencies = data)
-                        }
-                        val date = Date(System.currentTimeMillis())
-                        localDataSource.saveDbUpdateTime(date)
-                        localDataSource.savedBInitializedState(true)
-                        send(Resource.Success(data = data))
-                    }
-
-                } else if (result is Resource.Error) {
-                    send(Resource.Error(result.message ?: "Could not get data."))
-                }else if( result is Resource.Loading){
-                    send(Resource.Loading())
-                }else if(result is Resource.Empty){
+                if (data.isEmpty()) {
                     send(Resource.Empty())
+                } else {
+                    withContext(externalScope.coroutineContext) {
+                        localDataSource.insertAllCurrencies(currencies = data)
+                    }
+                    val date = Date(System.currentTimeMillis())
+                    localDataSource.saveDbUpdateTime(date)
+                    localDataSource.savedBInitializedState(true)
+                    send(Resource.Success(data = data))
                 }
+
+            } else if (result is Resource.Error) {
+                send(Resource.Error(result.message ?: "Could not get data."))
+            } else if (result is Resource.Loading) {
+                send(Resource.Loading())
+            } else if (result is Resource.Empty) {
+                send(Resource.Empty())
+            }
         }
     }
 
