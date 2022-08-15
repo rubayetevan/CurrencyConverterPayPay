@@ -21,5 +21,6 @@ NOTE: Until Tuesday 24 May 2022, this code challenge required the use of the cur
 ![Untitled-2022-08-13-1818](https://user-images.githubusercontent.com/16047748/184496385-00f20cae-34be-404b-b9cf-caf54eeef65a.png)
 ## :file_folder: Database Structure:
 ![Untitled-2022-08-13-1911](https://user-images.githubusercontent.com/16047748/184498647-e0d6ae9f-95d3-4c5c-b647-d2741cf8bb6a.png)
-
+## :runner: Application process flow:
+![app (2)](https://user-images.githubusercontent.com/16047748/184597344-81e4fe79-5a8d-45f6-8386-965c9f1793e4.png)
 
