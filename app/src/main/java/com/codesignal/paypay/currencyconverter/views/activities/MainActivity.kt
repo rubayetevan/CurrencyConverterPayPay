@@ -16,6 +16,7 @@ import com.codesignal.paypay.currencyconverter.viewModels.MainViewModel
 import com.codesignal.paypay.currencyconverter.views.adapters.CurrencyAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 @AndroidEntryPoint
@@ -23,7 +24,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private val viewModel: MainViewModel by viewModels()
-    private val currencyAdapter = CurrencyAdapter()
+
+    @Inject
+    lateinit var currencyAdapter:CurrencyAdapter
 
     private val networkCallback = object : ConnectivityManager.NetworkCallback() {
         // network is available for use
