@@ -36,6 +36,7 @@ object DatabaseModule {
     }
 
     @Provides
+    @Singleton
     fun provideCurrencyModelDao(appDatabase: AppDatabase): CurrencyModelDao {
         return appDatabase.currencyModelDao()
     }
