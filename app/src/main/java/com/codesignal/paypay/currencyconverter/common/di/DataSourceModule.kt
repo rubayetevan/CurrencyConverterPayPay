@@ -44,6 +44,7 @@ object DataSourceModule {
         return LocalDataSource(currencyModelDao, sharedPreferences)
     }
 
+    @Singleton
     @Provides
     fun provideRepository(
         externalScope: CoroutineScope,
